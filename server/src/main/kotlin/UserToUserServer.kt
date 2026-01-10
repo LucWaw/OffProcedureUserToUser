@@ -1,7 +1,0 @@
-class UserToUserServer {
-
-}
-
-fun main(){
-
-}

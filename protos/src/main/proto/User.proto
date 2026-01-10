@@ -19,8 +19,8 @@ service UserService {
 
 // Create user
 message CreateUserRequest {
-  string user_id = 1;                 // client or server generated; prefer server-generated UUID
-  string username = 2;                // unique username (optional)
+  reserved 1;                 // client or server generated; prefer server-generated UUID
+  reserved 2;                // unique username (optional)
   string display_name = 3;            // display name
 }
 
@@ -39,7 +39,7 @@ message ListUsersRequest {
 
 message User {
   string user_id = 1;
-  string username = 2;
+  reserved 2;
   string display_name = 3;
 }
 
