@@ -1,4 +1,5 @@
 syntax = "proto3";
+package utou.v1;
 
 enum StatusCode {
   STATUS_OK = 0;

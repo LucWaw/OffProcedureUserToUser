@@ -1,22 +1,43 @@
 # Version catalog is a central place for you to declare and version dependencies
 # https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
-
 [versions]
-kotlin = "2.2.20"
 kotlinxDatetime = "0.6.2"
 kotlinxSerializationJSON = "1.8.1"
 kotlinxCoroutines = "1.10.2"
 
 [libraries]
-kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.12.01" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-ui = { module = "androidx.compose.ui:ui" }
 kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinxSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJSON" }
 kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.10.2" }
+grpc-stub = { group = "io.grpc", name = "grpc-stub", version = "1.78.0" }
+grpc-protobuf = { group = "io.grpc", name = "grpc-protobuf", version = "1.78.0" }
+grpc-kotlin-stub = { group = "io.grpc", name = "grpc-kotlin-stub", version = "1.5.0" }
+protobuf-java-util = { group = "com.google.protobuf", name = "protobuf-java-util", version = "4.33.2" }
+protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version = "4.33.2" }
+protoc = { group = "com.google.protobuf", name = "protoc", version = "4.33.2" }
+protoc-gen-grpc-java = { group = "io.grpc", name = "protoc-gen-grpc-java", version = "1.78.0" }
+protoc-gen-grpc-kotlin = { group = "io.grpc", name = "protoc-gen-grpc-kotlin", version = "1.5.0" }
+grpc-protobuf-lite = { group = "io.grpc", name = "grpc-protobuf-lite", version = "1.78.0" }
+protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version = "4.33.2" }
+grpc-netty = { group = "io.grpc", name = "grpc-netty", version = "1.78.0" }
+kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version = "2.2.10" }
+grpc-testing = { group = "io.grpc", name = "grpc-testing", version = "1.75.0" }
 
 # Libraries can be bundled together for easier import
 [bundles]
 kotlinxEcosystem = ["kotlinxDatetime", "kotlinxSerialization", "kotlinxCoroutines"]
 
 [plugins]
-kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+protobuf = { id = "com.google.protobuf", version = "0.9.5" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.2.20" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.2.20" }
+android-application = { id = "com.android.application", version = "8.13.0" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version = "2.2.20" }
+android-library = { id = "com.android.library", version = "8.13.0" }
+jib = { id = "com.google.cloud.tools.jib", version = "3.4.1" }
