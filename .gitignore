@@ -43,3 +43,29 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+
+.gradle/
+
+local.properties
+
+*.log
+
+captures/
+.externalNativeBuild/
+.cxx/
+*.aab
+*.apk
+output-metadata.json
+
+.idea/
+misc.xml
+deploymentTargetDropDown.xml
+render.experimental.xml
+
+*.jks
+*.keystore
+
+google-services.json
+
+*.hprof
