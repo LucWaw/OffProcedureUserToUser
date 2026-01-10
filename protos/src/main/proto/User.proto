@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package utou.v1;
+
+option java_multiple_files = true;
+option java_outer_classname = "UserProto";
+option java_package = "fr.lucwaw.utou.user";
+
+import "common.proto";
+
+// User service: create/list users and manage device tokens (FCM)
+service UserService {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {}
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {}
+
+  // Register/update a device token for push notifications (FCM token)
+  rpc RegisterDevice(RegisterDeviceRequest) returns (RegisterDeviceResponse) {}
+}
+
+// Create user
+message CreateUserRequest {
+  string user_id = 1;                 // client or server generated; prefer server-generated UUID
+  string username = 2;                // unique username (optional)
+  string display_name = 3;            // display name
+}
+
+message CreateUserResponse {
+  StatusCode status = 1;
+  string user_id = 2; // server generated id if not supplied
+  string message = 3;
+}
+
+// List users
+message ListUsersRequest {
+  // optional filters in future (search, limit, offset)
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message User {
+  string user_id = 1;
+  string username = 2;
+  string display_name = 3;
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+}
+
+// Device token management (for FCM)
+message RegisterDeviceRequest {
+  string user_id = 1;
+  string device_id = 2;    // client device id (optional but useful)
+  string fcm_token = 3;    // token received from FCM SDK
+}
+
+message RegisterDeviceResponse {
+  StatusCode status = 1;
+  string message = 2;
+}

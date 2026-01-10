@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+enum StatusCode {
+  STATUS_OK = 0;
+  STATUS_ERROR = 1;
+  STATUS_ALREADY_EXISTS = 2;
+  STATUS_NOT_FOUND = 3;
+}
