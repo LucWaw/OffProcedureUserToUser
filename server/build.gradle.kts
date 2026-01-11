@@ -15,22 +15,22 @@ dependencies {
     testImplementation(libs.grpc.testing)
 }
 
-tasks.register<JavaExec>("UserToUserServer") {
+tasks.register<JavaExec>("UserPingServer") {
     dependsOn("classes")
     classpath = sourceSets["main"].runtimeClasspath
-    mainClass.set("UserToUserServerKt")
+    mainClass.set("UserPingServerKt")
 }
 
-val userToUserServerStartScripts =
-    tasks.register<CreateStartScripts>("UserToUserServerStartScripts") {
-        mainClass.set("UserToUserServerKt")
-        applicationName = "hello-world-server"
+val userPingServerStartScripts =
+    tasks.register<CreateStartScripts>("UserPingServerStartScripts") {
+        mainClass.set("UserPingServerKt")
+        applicationName = "user-to-user-server"
         outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
         classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
     }
 
 tasks.named("startScripts") {
-    dependsOn(userToUserServerStartScripts)
+    dependsOn(userPingServerStartScripts)
 }
 
 tasks.withType<Test> {
@@ -48,4 +48,4 @@ tasks.withType<Test> {
     }
 }
 
-jib { container { mainClass = "UserToUserServerKt" } }
+jib { container { mainClass = "UserPingServerKt" } }

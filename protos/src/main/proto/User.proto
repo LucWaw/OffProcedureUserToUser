@@ -50,7 +50,7 @@ message ListUsersResponse {
 // Device token management (for FCM)
 message RegisterDeviceRequest {
   string user_id = 1;
-  string device_id = 2;    // client device id (optional but useful)
+  reserved 2;    // client device id (optional but useful)
   string fcm_token = 3;    // token received from FCM SDK
 }
 

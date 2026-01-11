@@ -14,21 +14,11 @@ service PingService {
   // Unary: send a ping to a target user.
   // Client supplies ping_id to ensure idempotency on retries.
   rpc SendPing(SendPingRequest) returns (SendPingResponse) {}
-
-  // Server streaming: subscribe to incoming pings for the authenticated user.
-  // Server will stream PingMessage as they arrive.
-  // ObserveRequest may include the last_received_ping_id or since_timestamp
-  // so the server can send missed events immediately upon subscription.
-  rpc SubscribePings(SubscribeRequest) returns (stream PingMessage) {}
-
-  // Unary: fetch missed pings since last known id / timestamp (sync-on-reconnect).
-  // Good for offline recovery.
-  rpc FetchMissedPings(FetchMissedRequest) returns (PingList) {}
 }
 
 // Request to send a ping
 message SendPingRequest {
-  string ping_id = 1;            // client-generated UUID for idempotency
+  reserved 1;
   string from_user_id = 2;       // uuid of sender
   string to_user_id = 3;         // uuid of recipient
   google.protobuf.Timestamp created_at = 4; // client timestamp (optional)
@@ -37,30 +27,8 @@ message SendPingRequest {
 // Response for SendPing
 message SendPingResponse {
   StatusCode status = 1;
-  string ping_id = 2; // echo id
+  reserved 2; // echo id
   string message = 3; // human message/debug
-}
-
-// Request to open a subscription (server streaming)
-message SubscribeRequest {
-  string user_id = 1;                 // identity - can be omitted if auth used
-  string last_received_ping_id = 2;   // server can replay since this id
-}
-
-// Single Ping message streamed from server to client
-message PingMessage {
-  string ping_id = 1;
-  string from_user_id = 2;
-  string to_user_id = 3;
-  google.protobuf.Timestamp server_created_at = 4;
-}
-
-// FetchMissed requests replies with a list
-message FetchMissedRequest {
-  string user_id = 1;
-  string since_ping_id = 2;
-}
-
-message PingList {
-  repeated PingMessage pings = 1;
+  string from_user_id = 4;
+  string to_user_id = 5;// uuid of recipient
 }

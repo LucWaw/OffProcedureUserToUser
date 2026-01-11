@@ -1,36 +1,23 @@
-import fr.lucwaw.utou.ping.FetchMissedRequest
-import fr.lucwaw.utou.ping.PingList
-import fr.lucwaw.utou.ping.PingMessage
 import fr.lucwaw.utou.ping.PingServiceGrpcKt
 import fr.lucwaw.utou.ping.SendPingRequest
 import fr.lucwaw.utou.ping.SendPingResponse
-import fr.lucwaw.utou.ping.SubscribeRequest
-import fr.lucwaw.utou.user.CreateUserRequest
-import fr.lucwaw.utou.user.CreateUserResponse
-import fr.lucwaw.utou.user.ListUsersRequest
-import fr.lucwaw.utou.user.ListUsersResponse
-import fr.lucwaw.utou.user.RegisterDeviceRequest
-import fr.lucwaw.utou.user.RegisterDeviceResponse
-import fr.lucwaw.utou.user.User
-import fr.lucwaw.utou.user.UserServiceGrpcKt
-import fr.lucwaw.utou.user.createUserResponse
-import fr.lucwaw.utou.user.listUsersResponse
-import fr.lucwaw.utou.user.registerDeviceResponse
+import fr.lucwaw.utou.ping.sendPingResponse
+import fr.lucwaw.utou.user.*
 import io.grpc.Server
 import io.grpc.ServerBuilder
-import kotlinx.coroutines.flow.Flow
 import utou.v1.Common
-import java.util.UUID
+import java.util.*
 
 
 class UserPingServer(private val port: Int) {
-    val listOfUsers : MutableSet<User> = mutableSetOf()
-    private val devices = mutableMapOf<String, MutableMap<String, String>>()
+    val listOfUsers: MutableSet<User> = mutableSetOf()
+    private val devices: MutableMap<String, String> = mutableMapOf()  // userId -> deviceId
+
 
     val server: Server =
         ServerBuilder.forPort(port)
             .addService(UserToUserService(listOfUsers, devices))
-            .addService(PingService())
+            .addService(PingService(listOfUsers, devices))
             .build()
 
     fun start() {
@@ -54,7 +41,7 @@ class UserPingServer(private val port: Int) {
         server.awaitTermination()
     }
 
-    internal class UserToUserService(private val listOfUsers: MutableSet<User>, private val devices: MutableMap<String, MutableMap<String, String>>) : UserServiceGrpcKt.UserServiceCoroutineImplBase() {
+    internal class UserToUserService(private val listOfUsers: MutableSet<User>, private val devices: MutableMap<String, String>) : UserServiceGrpcKt.UserServiceCoroutineImplBase() {
         override suspend fun createUser(request: CreateUserRequest): CreateUserResponse {
             var statusCode = Common.StatusCode.STATUS_OK
             val user = User.newBuilder().setUserId(UUID.randomUUID().toString()).setDisplayName(request.displayName).build()
@@ -77,63 +64,66 @@ class UserPingServer(private val port: Int) {
             }
         }
 
+        /**
+         * Here, for simplicity, we have chosen that a user have only one device, so we don't store deviceId
+         */
         override suspend fun registerDevice(request: RegisterDeviceRequest): RegisterDeviceResponse {
             val userId = request.userId
-            val deviceId = request.deviceId
             val token = request.fcmToken
 
             // --- validations de base ---
-            if (userId.isBlank() || deviceId.isBlank() || token.isBlank()) {
+            if (userId.isBlank() || token.isBlank()) {
                 return registerDeviceResponse {
                     status = Common.StatusCode.STATUS_ERROR
                     message = "Invalid arguments: userId, deviceId and fcmToken must not be empty."
                 }
             }
 
-            // --- utilisateur existe ? ---
-            if (listOfUsers.find { it.userId == userId } == null) {
+            // L'utilisateur existe-t-il ?
+            val userExists = listOfUsers.any { it.userId == userId }
+            if (!userExists) {
                 return registerDeviceResponse {
                     status = Common.StatusCode.STATUS_NOT_FOUND
                     message = "User not found"
                 }
             }
 
-            // --- récupération ou création du registre des devices de cet utilisateur ---
-            val userDevices = devices.getOrPut(userId) { mutableMapOf() }
-
-            // --- device déjà enregistré ? ---
-            val alreadyExists = userDevices.containsKey(deviceId)
-
-            // update / insert
-            userDevices[deviceId] = token
+            // Enregistrement / mise à jour du device
+            val alreadyExists = devices.containsKey(userId)
+            devices[userId] = token
 
             return registerDeviceResponse {
-                status = if (alreadyExists) {
-                    Common.StatusCode.STATUS_ALREADY_EXISTS
-                } else {
-                    Common.StatusCode.STATUS_OK
-                }
-
-                message = if (alreadyExists) {
-                    "Device already registered. Token updated."
-                } else {
-                    "Device successfully registered."
-                }
+                status = if (alreadyExists) Common.StatusCode.STATUS_ALREADY_EXISTS else Common.StatusCode.STATUS_OK
+                message = if (alreadyExists) "Device updated" else "Device registered"
             }
+        }
         }
     }
 
-    internal class PingService() : PingServiceGrpcKt.PingServiceCoroutineImplBase() {
-        override suspend fun fetchMissedPings(request: FetchMissedRequest): PingList {
-            return super.fetchMissedPings(request)
+internal class PingService(
+    private val listOfUsers: MutableSet<User>,
+    private val devices: MutableMap<String, String>
+) : PingServiceGrpcKt.PingServiceCoroutineImplBase() {
+
+    override suspend fun sendPing(request: SendPingRequest): SendPingResponse {
+        println("Send Ping")
+        val userId = request.toUserId
+
+        // Vérifier que l'utilisateur existe et qu'il a un device
+        val userExists = listOfUsers.any { it.userId == userId }
+        val deviceExists = devices.containsKey(userId)
+
+        val status = if (!userExists || !deviceExists) {
+            Common.StatusCode.STATUS_NOT_FOUND
+        } else {
+            Common.StatusCode.STATUS_OK
         }
 
-        override suspend fun sendPing(request: SendPingRequest): SendPingResponse {
-            return super.sendPing(request)
-        }
-
-        override fun subscribePings(request: SubscribeRequest): Flow<PingMessage> {
-            return super.subscribePings(request)
+        return sendPingResponse {
+            this.fromUserId = request.fromUserId
+            this.toUserId = request.toUserId
+            this.status = status
+            this.message = if (status == Common.StatusCode.STATUS_OK) "Ping sent" else "User or device not found"
         }
     }
 }

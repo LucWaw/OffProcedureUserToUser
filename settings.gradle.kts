@@ -32,7 +32,8 @@ if (startParameter.taskRequests.find { it.args.contains("assemble") } == null) {
         "stub",
         "server",
         "stub-android",
-        "android"
+        "android",
+        "clientkotlin"
     )
 } else {
     include("protos", "server", "stub")
