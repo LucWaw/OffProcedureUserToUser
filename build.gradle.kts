@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.protobuf) apply false
     alias(libs.plugins.hiltAndroid) apply false
     alias(libs.plugins.kotlinAndroidKsp) apply false
+    alias(libs.plugins.googleServices) apply false
 }
 
 tasks.create("assemble").dependsOn(":server:installDist")

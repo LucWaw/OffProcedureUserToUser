@@ -23,5 +23,13 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         setContentView(binding.root)
+        setupRegisterButton()
+    }
+
+    private fun setupRegisterButton() {
+        binding.button.setOnClickListener {
+            val register = RegisterUserActivity()
+            register.register()
+        }
     }
 }

@@ -31,9 +31,8 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".screen.profile.FMService"
-            android:exported="false"
-            android:directBootAware="true">
+            android:name=".FMService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

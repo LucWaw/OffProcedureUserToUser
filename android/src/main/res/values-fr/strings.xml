@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">UtoU</string>
     <string name="no_user">Pas d\'utilisateurs</string>
+    <string name="button">S\'enregistrer</string>
 </resources>

@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">UtoU</string>
     <string name="no_user">No Users</string>
+    <string name="button">Register</string>
 </resources>

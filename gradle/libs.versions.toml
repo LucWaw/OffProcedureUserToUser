@@ -2,6 +2,8 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 [versions]
+firebaseAdmin = "9.7.0"
+firebaseBom = "34.7.0"
 fragmentKtx = "1.8.9"
 kotlinMetadataJvm = "2.2.0"
 kotlinxDatetime = "0.7.1"
@@ -14,12 +16,16 @@ activity = "1.12.2"
 material = "1.13.0"
 appcompat = "1.7.1"
 coreKtx = "1.17.0"
+google = "4.4.4"
 
 [libraries]
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.12.01" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
+firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebaseAdmin" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 kotlin-metadata-jvm = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version.ref = "kotlinMetadataJvm" }
 kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinxSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJSON" }
@@ -55,7 +61,8 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-
+firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
+firebase-messaging-directboot = { module = "com.google.firebase:firebase-messaging-directboot" }
 
 # Libraries can be bundled together for easier import
 [bundles]
@@ -71,3 +78,4 @@ android-library = { id = "com.android.library", version = "8.13.2" }
 jib = { id = "com.google.cloud.tools.jib", version = "3.5.2" }
 kotlinAndroidKsp = { id = "com.google.devtools.ksp", version.ref ="kspVersion" }
 hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref ="hiltVersion" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "google" }

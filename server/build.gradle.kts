@@ -13,6 +13,9 @@ dependencies {
 
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.grpc.testing)
+    implementation(libs.firebase.admin)
+
+    implementation("org.slf4j:slf4j-simple:2.0.9")
 }
 
 tasks.register<JavaExec>("UserPingServer") {

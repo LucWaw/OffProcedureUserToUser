@@ -1,9 +1,16 @@
 package fr.lucwaw.utou.user
 
+import android.Manifest
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -16,7 +23,6 @@ import kotlinx.coroutines.launch
 class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
     private var _binding: RecyclerUsersBinding? = null
     private val binding get() = _binding!!
-
 
 
     private val viewModel: UsersViewModel by viewModels()
@@ -33,7 +39,60 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
         savedInstanceState: Bundle?
     ): View {
         _binding = RecyclerUsersBinding.inflate(inflater, container, false)
+        askNotificationPermission()
         return binding.root
+    }
+
+    // Declare the launcher at the top of your Activity/Fragment:
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { isGranted: Boolean ->
+        /*if (isGranted) {
+            // FCM SDK (and your app) can post notifications.
+        } else {
+        }*/
+    }
+
+    private fun askNotificationPermission() {
+        // This is only necessary for API level >= 33 (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    requireActivity(),
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                // FCM SDK (and your app) can post notifications.
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                // display an educational UI explaining to the user the features that will be enabled
+                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
+                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
+                //       If the user selects "No thanks," allow the user to continue without notifications.
+                showNotificationPermissionRationale(requireActivity()) {
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            } else {
+                // Directly ask for the permission
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    fun showNotificationPermissionRationale(activity: Activity, onGranted: () -> Unit) {
+        AlertDialog.Builder(activity)
+            .setTitle("Activer les notifications")
+            .setMessage(
+                "Pour que vous puissiez recevoir facilement les pings " +
+                        "d’autres utilisateurs, nous avons besoin d’autoriser les notifications. " +
+                        "Vous pourrez toujours les désactiver plus tard dans les paramètres."
+            )
+            .setPositiveButton("OK") { _, _ ->
+                onGranted()
+            }
+            .setNegativeButton("Non merci") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
 

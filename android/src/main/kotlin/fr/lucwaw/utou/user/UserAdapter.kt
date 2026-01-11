@@ -9,13 +9,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import fr.lucwaw.utou.databinding.ItemUserBinding
 
-class UserAdapter( private val listener: OnUserClickListener) :
+class UserAdapter(private val listener: OnUserClickListener) :
     ListAdapter<User, UserAdapter.UserViewHolder>(
         DIFF_CALLBACK
     ) {
 
     inner class UserViewHolder(binding: ItemUserBinding) : RecyclerView.ViewHolder(binding.root) {
-        var name:TextView = binding.name
+        var name: TextView = binding.name
 
 
         fun bind(user: User, listener: OnUserClickListener) {
@@ -25,8 +25,7 @@ class UserAdapter( private val listener: OnUserClickListener) :
         }
     }
 
-    interface OnUserClickListener
-    {
+    interface OnUserClickListener {
 
         fun onUserClick(user: User)
 
@@ -50,7 +49,6 @@ class UserAdapter( private val listener: OnUserClickListener) :
         holder.bind(user, listener)
 
     }
-
 
 
     companion object {

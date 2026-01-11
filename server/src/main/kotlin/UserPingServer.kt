@@ -1,12 +1,29 @@
+import com.google.auth.oauth2.GoogleCredentials
+import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseOptions
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.Message
+import com.google.firebase.messaging.Notification
 import fr.lucwaw.utou.ping.PingServiceGrpcKt
 import fr.lucwaw.utou.ping.SendPingRequest
 import fr.lucwaw.utou.ping.SendPingResponse
 import fr.lucwaw.utou.ping.sendPingResponse
-import fr.lucwaw.utou.user.*
+import fr.lucwaw.utou.user.CreateUserRequest
+import fr.lucwaw.utou.user.CreateUserResponse
+import fr.lucwaw.utou.user.ListUsersRequest
+import fr.lucwaw.utou.user.ListUsersResponse
+import fr.lucwaw.utou.user.RegisterDeviceRequest
+import fr.lucwaw.utou.user.RegisterDeviceResponse
+import fr.lucwaw.utou.user.User
+import fr.lucwaw.utou.user.UserServiceGrpcKt
+import fr.lucwaw.utou.user.createUserResponse
+import fr.lucwaw.utou.user.listUsersResponse
+import fr.lucwaw.utou.user.registerDeviceResponse
 import io.grpc.Server
 import io.grpc.ServerBuilder
 import utou.v1.Common
-import java.util.*
+import java.io.FileInputStream
+import java.util.UUID
 
 
 class UserPingServer(private val port: Int) {
@@ -22,6 +39,15 @@ class UserPingServer(private val port: Int) {
 
     fun start() {
         server.start()
+        val serviceAccount =
+            FileInputStream("./offprocedureusertouser-firebase-adminsdk-fbsvc-19b98dab63.json")
+
+        val options = FirebaseOptions.builder()
+            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+            .build()
+
+        FirebaseApp.initializeApp(options)
+
         println("Server started, listening on $port")
         Runtime.getRuntime()
             .addShutdownHook(
@@ -41,11 +67,15 @@ class UserPingServer(private val port: Int) {
         server.awaitTermination()
     }
 
-    internal class UserToUserService(private val listOfUsers: MutableSet<User>, private val devices: MutableMap<String, String>) : UserServiceGrpcKt.UserServiceCoroutineImplBase() {
+    internal class UserToUserService(
+        private val listOfUsers: MutableSet<User>,
+        private val devices: MutableMap<String, String>
+    ) : UserServiceGrpcKt.UserServiceCoroutineImplBase() {
         override suspend fun createUser(request: CreateUserRequest): CreateUserResponse {
             var statusCode = Common.StatusCode.STATUS_OK
-            val user = User.newBuilder().setUserId(UUID.randomUUID().toString()).setDisplayName(request.displayName).build()
-            if (!listOfUsers.contains(user)){
+            val user = User.newBuilder().setUserId(UUID.randomUUID().toString())
+                .setDisplayName(request.displayName).build()
+            if (!listOfUsers.contains(user)) {
                 listOfUsers.add(user)
             } else {
                 statusCode = Common.StatusCode.STATUS_ALREADY_EXISTS
@@ -93,12 +123,13 @@ class UserPingServer(private val port: Int) {
             devices[userId] = token
 
             return registerDeviceResponse {
-                status = if (alreadyExists) Common.StatusCode.STATUS_ALREADY_EXISTS else Common.StatusCode.STATUS_OK
+                status =
+                    if (alreadyExists) Common.StatusCode.STATUS_ALREADY_EXISTS else Common.StatusCode.STATUS_OK
                 message = if (alreadyExists) "Device updated" else "Device registered"
             }
         }
-        }
     }
+}
 
 internal class PingService(
     private val listOfUsers: MutableSet<User>,
@@ -110,20 +141,43 @@ internal class PingService(
         val userId = request.toUserId
 
         // Vérifier que l'utilisateur existe et qu'il a un device
-        val userExists = listOfUsers.any { it.userId == userId }
-        val deviceExists = devices.containsKey(userId)
+        val receiver = listOfUsers.find { it.userId == userId }
+        val sender = listOfUsers.find { it.userId == request.fromUserId }
+        val device = devices[userId]
 
-        val status = if (!userExists || !deviceExists) {
+        val status = if (receiver == null || device == null) {
             Common.StatusCode.STATUS_NOT_FOUND
         } else {
             Common.StatusCode.STATUS_OK
+        }
+
+        if (status == Common.StatusCode.STATUS_OK) {
+            try {
+                val message: Message = Message.builder()
+                    .setToken(device)
+                    .setNotification(
+                        Notification.builder()
+                            .setTitle("To you ${receiver?.displayName}")
+                            .setBody("To ${receiver?.displayName}, ${request.toUserId}, From ${sender?.displayName}, ${request.fromUserId}")
+                            .build()
+                    )
+                    .build()
+
+                val response = FirebaseMessaging.getInstance().send(message)
+
+                println("Successfully sent message: $response")
+            } catch (e: Exception) {
+                println("Error when sending message to firebase")
+            }
+
         }
 
         return sendPingResponse {
             this.fromUserId = request.fromUserId
             this.toUserId = request.toUserId
             this.status = status
-            this.message = if (status == Common.StatusCode.STATUS_OK) "Ping sent" else "User or device not found"
+            this.message =
+                if (status == Common.StatusCode.STATUS_OK) "Ping sent" else "User or device not found"
         }
     }
 }

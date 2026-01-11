@@ -8,7 +8,7 @@ kotlin { jvmToolchain(21) }
 dependencies {
     implementation(project(":stub"))
     runtimeOnly(libs.grpc.netty)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation(libs.kotlinx.coroutines.core)
 }
 
 tasks.register<JavaExec>("UtoUClient") {

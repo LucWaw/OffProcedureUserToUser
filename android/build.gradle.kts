@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlinAndroidKsp)
     alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.googleServices)
 }
 
 dependencies {
@@ -28,6 +29,11 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     runtimeOnly(libs.grpc.okhttp)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.messaging.directboot)
 }
 
 kotlin { jvmToolchain(21) }
@@ -38,7 +44,7 @@ android {
     namespace = "fr.lucwaw.utou"
 
     defaultConfig {
-        applicationId = "fr.lucwaw.OffProcedureUserToUser.android"
+        applicationId = "fr.lucwaw.OffProcedureUserToUser"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -49,6 +55,4 @@ android {
         viewBinding = true
         compose = true
     }
-
-    composeOptions { kotlinCompilerExtensionVersion = libs.androidx.compose.compiler.get().version }
 }
