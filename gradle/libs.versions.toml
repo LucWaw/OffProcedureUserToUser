@@ -2,18 +2,27 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 [versions]
-kotlinxDatetime = "0.6.2"
-kotlinxSerializationJSON = "1.8.1"
+fragmentKtx = "1.8.9"
+kotlinMetadataJvm = "2.2.0"
+kotlinxDatetime = "0.7.1"
+kotlinxSerializationJSON = "1.9.0"
 kotlinxCoroutines = "1.10.2"
+kspVersion = "2.3.4"
+hiltVersion = "2.57.2"
+constraintlayout = "2.2.1"
+activity = "1.12.2"
+material = "1.13.0"
+appcompat = "1.7.1"
+coreKtx = "1.17.0"
 
 [libraries]
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.12.01" }
-androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
+kotlin-metadata-jvm = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version.ref = "kotlinMetadataJvm" }
 kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinxSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJSON" }
-kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.10.2" }
 grpc-stub = { group = "io.grpc", name = "grpc-stub", version = "1.78.0" }
 grpc-protobuf = { group = "io.grpc", name = "grpc-protobuf", version = "1.78.0" }
@@ -26,18 +35,39 @@ protoc-gen-grpc-kotlin = { group = "io.grpc", name = "protoc-gen-grpc-kotlin", v
 grpc-protobuf-lite = { group = "io.grpc", name = "grpc-protobuf-lite", version = "1.78.0" }
 protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version = "4.33.2" }
 grpc-netty = { group = "io.grpc", name = "grpc-netty", version = "1.78.0" }
-kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version = "2.2.10" }
-grpc-testing = { group = "io.grpc", name = "grpc-testing", version = "1.75.0" }
+kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version = "2.2.20" }
+grpc-testing = { group = "io.grpc", name = "grpc-testing", version = "1.78.0" }
+grpc-okhttp = { group = "io.grpc", name = "grpc-okhttp", version = "1.78.0" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.12.2" }
+androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version = "1.10.0" }
+androidx-compose-material = { group = "androidx.compose.material", name = "material", version = "1.10.0" }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version = "1.10.0" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version = "1.10.0" }
+androidx-compose-compiler = { group = "androidx.compose.compiler", name = "compiler", version = "1.5.15" }
+
+hilt-android = { group = "com.google.dagger", name = "hilt-android" , version.ref = "hiltVersion"}
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler" , version.ref = "hiltVersion"}
+
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
 
 # Libraries can be bundled together for easier import
 [bundles]
-kotlinxEcosystem = ["kotlinxDatetime", "kotlinxSerialization", "kotlinxCoroutines"]
+kotlinxEcosystem = ["kotlinxDatetime", "kotlinxSerialization", "kotlinx-coroutines-core"]
 
 [plugins]
-protobuf = { id = "com.google.protobuf", version = "0.9.5" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.2.20" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.2.20" }
-android-application = { id = "com.android.application", version = "8.13.0" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version = "2.2.20" }
-android-library = { id = "com.android.library", version = "8.13.0" }
-jib = { id = "com.google.cloud.tools.jib", version = "3.4.1" }
+protobuf = { id = "com.google.protobuf", version = "0.9.6" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.3.0" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.3.0" }
+android-application = { id = "com.android.application", version = "8.13.2" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version = "2.3.0" }
+android-library = { id = "com.android.library", version = "8.13.2" }
+jib = { id = "com.google.cloud.tools.jib", version = "3.5.2" }
+kotlinAndroidKsp = { id = "com.google.devtools.ksp", version.ref ="kspVersion" }
+hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref ="hiltVersion" }
