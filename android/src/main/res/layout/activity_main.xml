@@ -9,20 +9,23 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container_view"
-        android:name="fr.lucwaw.utou.user.UsersFragment"
+        android:name="fr.lucwaw.utou.user.list.UsersFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:layout_editor_absoluteX="-27dp"
-        tools:layout_editor_absoluteY="-25dp" />
+        tools:layout_editor_absoluteY="-25dp"
+        tools:layout="@layout/recycler_users" />
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="200dp"
-        android:layout_height="65dp"
-        android:layout_marginBottom="24dp"
-        android:text="@string/button"
+
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragment_button"
+        android:name="fr.lucwaw.utou.user.register.ButtonFragment"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout="@layout/fragment_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

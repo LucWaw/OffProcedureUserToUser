@@ -70,3 +70,4 @@ google-services.json
 
 *.hprof
 /server/offprocedureusertouser-firebase-adminsdk-fbsvc-19b98dab63.json
+/server/offprocedureusertouser-firebase-adminsdk.json

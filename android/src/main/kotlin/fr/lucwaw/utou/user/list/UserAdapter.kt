@@ -1,4 +1,4 @@
-package fr.lucwaw.utou.user
+package fr.lucwaw.utou.user.list
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
@@ -8,13 +8,14 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import fr.lucwaw.utou.databinding.ItemUserBinding
+import fr.lucwaw.utou.user.User
 
 class UserAdapter(private val listener: OnUserClickListener) :
     ListAdapter<User, UserAdapter.UserViewHolder>(
         DIFF_CALLBACK
     ) {
 
-    inner class UserViewHolder(binding: ItemUserBinding) : RecyclerView.ViewHolder(binding.root) {
+    class UserViewHolder(binding: ItemUserBinding) : RecyclerView.ViewHolder(binding.root) {
         var name: TextView = binding.name
 
 

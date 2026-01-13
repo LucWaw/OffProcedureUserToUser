@@ -40,7 +40,7 @@ class UserPingServer(private val port: Int) {
     fun start() {
         server.start()
         val serviceAccount =
-            FileInputStream("./offprocedureusertouser-firebase-adminsdk-fbsvc-19b98dab63.json")
+            FileInputStream("./offprocedureusertouser-firebase-adminsdk.json")
 
         val options = FirebaseOptions.builder()
             .setCredentials(GoogleCredentials.fromStream(serviceAccount))
@@ -121,6 +121,7 @@ class UserPingServer(private val port: Int) {
             // Enregistrement / mise à jour du device
             val alreadyExists = devices.containsKey(userId)
             devices[userId] = token
+            println("User $userId registered is device")
 
             return registerDeviceResponse {
                 status =
@@ -167,10 +168,11 @@ internal class PingService(
 
                 println("Successfully sent message: $response")
             } catch (e: Exception) {
-                println("Error when sending message to firebase")
+                println("Error when sending message to firebase error: $e")
             }
 
         }
+        println("send to user $userId with device : ${devices[userId]}")
 
         return sendPingResponse {
             this.fromUserId = request.fromUserId

@@ -3,10 +3,12 @@ package fr.lucwaw.utou.di
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import fr.lucwaw.utou.data.repository.GrpcUserRepository
 import fr.lucwaw.utou.data.repository.UserRepository
+import fr.lucwaw.utou.ping.PingServiceGrpcKt
 import fr.lucwaw.utou.user.UserServiceGrpcKt
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
@@ -28,6 +30,11 @@ object GrpcModule {
     @Singleton
     fun provideUserStub(channel: ManagedChannel): UserServiceGrpcKt.UserServiceCoroutineStub =
         UserServiceGrpcKt.UserServiceCoroutineStub(channel)
+
+    @Provides
+    @Singleton
+    fun providePingStub(channel: ManagedChannel): PingServiceGrpcKt.PingServiceCoroutineStub =
+        PingServiceGrpcKt.PingServiceCoroutineStub(channel)
 }
 
 @Module
@@ -38,4 +45,10 @@ abstract class RepositoryModule {
     abstract fun bindUserRepository(
         impl: GrpcUserRepository
     ): UserRepository
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface UserRepositoryEntryPoint {
+    fun userRepository(): UserRepository
 }
