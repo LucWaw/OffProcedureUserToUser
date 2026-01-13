@@ -72,6 +72,7 @@ class UserPingServer(private val port: Int) {
         private val devices: MutableMap<String, String>
     ) : UserServiceGrpcKt.UserServiceCoroutineImplBase() {
         override suspend fun createUser(request: CreateUserRequest): CreateUserResponse {
+            println("Creating user")
             var statusCode = Common.StatusCode.STATUS_OK
             val user = User.newBuilder().setUserId(UUID.randomUUID().toString())
                 .setDisplayName(request.displayName).build()
@@ -98,6 +99,8 @@ class UserPingServer(private val port: Int) {
          * Here, for simplicity, we have chosen that a user have only one device, so we don't store deviceId
          */
         override suspend fun registerDevice(request: RegisterDeviceRequest): RegisterDeviceResponse {
+            println("Registering user")
+
             val userId = request.userId
             val token = request.fcmToken
 

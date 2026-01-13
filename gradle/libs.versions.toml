@@ -17,6 +17,7 @@ material = "1.13.0"
 appcompat = "1.7.1"
 coreKtx = "1.17.0"
 google = "4.4.4"
+swiperefreshlayout = "1.2.0"
 
 [libraries]
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.12.01" }
@@ -63,6 +64,7 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 firebase-messaging-directboot = { module = "com.google.firebase:firebase-messaging-directboot" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
 
 # Libraries can be bundled together for easier import
 [bundles]

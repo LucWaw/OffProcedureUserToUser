@@ -1,9 +1,7 @@
 package fr.lucwaw.utou.di
 
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import fr.lucwaw.utou.data.repository.GrpcUserRepository
@@ -35,20 +33,13 @@ object GrpcModule {
     @Singleton
     fun providePingStub(channel: ManagedChannel): PingServiceGrpcKt.PingServiceCoroutineStub =
         PingServiceGrpcKt.PingServiceCoroutineStub(channel)
-}
 
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class RepositoryModule {
-
-    @Binds
-    abstract fun bindUserRepository(
-        impl: GrpcUserRepository
-    ): UserRepository
-}
-
-@EntryPoint
-@InstallIn(SingletonComponent::class)
-interface UserRepositoryEntryPoint {
-    fun userRepository(): UserRepository
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        stub: UserServiceGrpcKt.UserServiceCoroutineStub,
+        pingStub: PingServiceGrpcKt.PingServiceCoroutineStub
+    ): UserRepository {
+        return GrpcUserRepository(stub, pingStub)
+    }
 }

@@ -3,14 +3,14 @@ package fr.lucwaw.utou.user.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import fr.lucwaw.utou.domain.GetUsersUseCase
+import fr.lucwaw.utou.domain.GetUsersFlowUseCase
 import fr.lucwaw.utou.domain.PingUserUseCase
-import fr.lucwaw.utou.user.User
-import kotlinx.coroutines.Dispatchers
+import fr.lucwaw.utou.domain.RefreshUsersUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import utou.v1.Common
 import javax.inject.Inject
@@ -18,21 +18,30 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UsersViewModel @Inject constructor(
-    private val getUsersUseCase: GetUsersUseCase,
+    getUsersFlowUseCase: GetUsersFlowUseCase,
+    private val refreshUsersUseCase: RefreshUsersUseCase,
     private val pingUserUseCase: PingUserUseCase
 ) : ViewModel() {
-    private val _usersFlow = MutableStateFlow<List<User>>(emptyList())
-    val usersFlow: StateFlow<List<User>> = _usersFlow.asStateFlow()
+    val usersFlow = getUsersFlowUseCase()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList()
+        )
 
+    private val _refreshing = MutableStateFlow(false)
+    val refreshing = _refreshing.asStateFlow()
 
-    init {
-        loadAllUsers()
-    }
-
-    fun loadAllUsers() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val users = getUsersUseCase.execute()
-            _usersFlow.value = users
+    fun refresh() {
+        viewModelScope.launch {
+            try {
+                _refreshing.value = true
+                refreshUsersUseCase()
+            } catch(_: Exception){
+                // optionnel : log / toast Event
+            } finally {
+                _refreshing.value = false
+            }
         }
     }
 
@@ -41,9 +50,9 @@ class UsersViewModel @Inject constructor(
 
     fun sendPing(toUserId: String) {
         viewModelScope.launch {
-            val result = pingUserUseCase.execute( toUserId)
+            val result = pingUserUseCase.execute(toUserId)
 
-            val toast = when(result.status) {
+            val toast = when (result.status) {
                 Common.StatusCode.STATUS_OK ->
                     "Ping envoyé"
 

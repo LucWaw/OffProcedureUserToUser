@@ -11,6 +11,8 @@ import fr.lucwaw.utou.user.UserServiceGrpcKt
 import fr.lucwaw.utou.user.createUserRequest
 import fr.lucwaw.utou.user.listUsersRequest
 import fr.lucwaw.utou.user.registerDeviceRequest
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import utou.v1.Common
 import javax.inject.Inject
 
@@ -22,13 +24,17 @@ class GrpcUserRepository @Inject constructor(
     override var generatedUserId: String = ""
     override var lastTokenGenerated: String = ""
 
-    override suspend fun getUsers(): List<User> {
+    private val _users = MutableStateFlow<List<User>>(emptyList())
+    override val usersFlow: StateFlow<List<User>> get() = _users
+
+    override suspend fun refreshUsers() {
         val response = stub.listUsers(
             listUsersRequest {
                 limit = 100
                 offset = 0
-            })
-        return response.usersList
+            }
+        )
+        _users.value = response.usersList
     }
 
     override suspend fun registerUser(userName: String): CreateUserResult {

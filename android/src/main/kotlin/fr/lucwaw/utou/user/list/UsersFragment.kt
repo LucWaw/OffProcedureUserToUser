@@ -62,7 +62,7 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
     // Declare the launcher at the top of your Activity/Fragment:
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
-    ) { isGranted: Boolean ->
+    ) { _: Boolean ->
         /*if (isGranted) {
             // FCM SDK (and your app) can post notifications.
         } else {
@@ -111,29 +111,27 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
             .show()
     }
 
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.loadAllUsers()
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.usersFlow.collect { users ->
-                if (users.isEmpty()) {
-                    binding.noData.visibility = View.VISIBLE
-                    binding.loading.visibility = View.GONE
-                } else {
-                    binding.noData.visibility = View.GONE
-                    binding.loading.visibility = View.GONE
-                }
-            }
-        }
-        context?.let { super.onAttach(it) }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.loading.visibility = View.VISIBLE
         setupRecyclerView()
         observeUsers()
+
+        binding.swipeRefresh.setOnRefreshListener {
+            viewModel.refresh()
+        }
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.refreshing.collect {
+                    binding.swipeRefresh.isRefreshing = it
+                }
+            }
+        }
+
+
+        // premier chargement
+        viewModel.refresh()
 
 
     }
@@ -141,18 +139,19 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
 
     private fun observeUsers() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.usersFlow.collect { users ->
-                candidateAdapter.submitList(users)
-                if (users.isEmpty()) {
-                    binding.noData.visibility = View.VISIBLE
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.usersFlow.collect { users ->
+                    candidateAdapter.submitList(users)
+                    binding.swipeRefresh.isRefreshing = false
+
                     binding.loading.visibility = View.GONE
-                } else {
-                    binding.noData.visibility = View.GONE
-                    binding.loading.visibility = View.GONE
+                    binding.noData.visibility =
+                        if (users.isEmpty()) View.VISIBLE else View.GONE
                 }
             }
         }
     }
+
 
     private fun setupRecyclerView() {
         candidateAdapter = UserAdapter(this)
