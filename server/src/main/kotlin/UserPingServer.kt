@@ -14,7 +14,7 @@ import fr.lucwaw.utou.user.ListUsersRequest
 import fr.lucwaw.utou.user.ListUsersResponse
 import fr.lucwaw.utou.user.RegisterDeviceRequest
 import fr.lucwaw.utou.user.RegisterDeviceResponse
-import fr.lucwaw.utou.user.User
+import fr.lucwaw.utou.user.GrpcUser
 import fr.lucwaw.utou.user.UserServiceGrpcKt
 import fr.lucwaw.utou.user.createUserResponse
 import fr.lucwaw.utou.user.listUsersResponse
@@ -27,7 +27,7 @@ import java.util.UUID
 
 
 class UserPingServer(private val port: Int) {
-    val listOfUsers: MutableSet<User> = mutableSetOf()
+    val listOfUsers: MutableSet<GrpcUser> = mutableSetOf()
     private val devices: MutableMap<String, String> = mutableMapOf()  // userId -> deviceId
 
 
@@ -68,13 +68,13 @@ class UserPingServer(private val port: Int) {
     }
 
     internal class UserToUserService(
-        private val listOfUsers: MutableSet<User>,
+        private val listOfUsers: MutableSet<GrpcUser>,
         private val devices: MutableMap<String, String>
     ) : UserServiceGrpcKt.UserServiceCoroutineImplBase() {
         override suspend fun createUser(request: CreateUserRequest): CreateUserResponse {
             println("Creating user")
             var statusCode = Common.StatusCode.STATUS_OK
-            val user = User.newBuilder().setUserId(UUID.randomUUID().toString())
+            val user = GrpcUser.newBuilder().setUserId(UUID.randomUUID().toString())
                 .setDisplayName(request.displayName).build()
             if (!listOfUsers.contains(user)) {
                 listOfUsers.add(user)
@@ -84,7 +84,7 @@ class UserPingServer(private val port: Int) {
 
             return createUserResponse {
                 this.status = statusCode
-                this.userId = user.userId.toString()
+                this.user = user
                 this.message = statusCode.toString()
             }
         }
@@ -117,14 +117,14 @@ class UserPingServer(private val port: Int) {
             if (!userExists) {
                 return registerDeviceResponse {
                     status = Common.StatusCode.STATUS_NOT_FOUND
-                    message = "User not found"
+                    message = "GrpcUser not found"
                 }
             }
 
             // Enregistrement / mise à jour du device
             val alreadyExists = devices.containsKey(userId)
             devices[userId] = token
-            println("User $userId registered is device")
+            println("GrpcUser $userId registered is device")
 
             return registerDeviceResponse {
                 status =
@@ -136,7 +136,7 @@ class UserPingServer(private val port: Int) {
 }
 
 internal class PingService(
-    private val listOfUsers: MutableSet<User>,
+    private val listOfUsers: MutableSet<GrpcUser>,
     private val devices: MutableMap<String, String>
 ) : PingServiceGrpcKt.PingServiceCoroutineImplBase() {
 
@@ -182,7 +182,7 @@ internal class PingService(
             this.toUserId = request.toUserId
             this.status = status
             this.message =
-                if (status == Common.StatusCode.STATUS_OK) "Ping sent" else "User or device not found"
+                if (status == Common.StatusCode.STATUS_OK) "Ping sent" else "GrpcUser or device not found"
         }
     }
 }

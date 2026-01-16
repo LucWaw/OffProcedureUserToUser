@@ -3,7 +3,7 @@ package fr.lucwaw.utou.user.register
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import fr.lucwaw.utou.domain.RegisterUserUseCase
+import fr.lucwaw.utou.domain.usecase.RegisterUserUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch

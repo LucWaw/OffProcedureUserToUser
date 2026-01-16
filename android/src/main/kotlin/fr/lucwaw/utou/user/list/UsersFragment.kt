@@ -20,7 +20,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import fr.lucwaw.utou.databinding.RecyclerUsersBinding
-import fr.lucwaw.utou.user.User
+import fr.lucwaw.utou.user.GrpcUser
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -159,7 +159,7 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
         binding.userRecyclerview.adapter = candidateAdapter
     }
 
-    override fun onUserClick(user: User) {
+    override fun onUserClick(user: GrpcUser) {
         viewModel.sendPing(user.userId)
     }
 

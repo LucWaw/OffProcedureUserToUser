@@ -3,9 +3,9 @@ package fr.lucwaw.utou.user.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import fr.lucwaw.utou.domain.GetUsersFlowUseCase
-import fr.lucwaw.utou.domain.PingUserUseCase
-import fr.lucwaw.utou.domain.RefreshUsersUseCase
+import fr.lucwaw.utou.domain.usecase.GetUsersFlowUseCase
+import fr.lucwaw.utou.domain.usecase.PingUserUseCase
+import fr.lucwaw.utou.domain.usecase.RefreshUsersUseCase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

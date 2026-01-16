@@ -17,16 +17,21 @@ material = "1.13.0"
 appcompat = "1.7.1"
 coreKtx = "1.17.0"
 google = "4.4.4"
+room = "2.8.4"
 swiperefreshlayout = "1.2.0"
 
 [libraries]
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.12.01" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
 firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebaseAdmin" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 kotlin-metadata-jvm = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version.ref = "kotlinMetadataJvm" }
 kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinxSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJSON" }
@@ -45,7 +50,6 @@ grpc-netty = { group = "io.grpc", name = "grpc-netty", version = "1.78.0" }
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version = "2.2.20" }
 grpc-testing = { group = "io.grpc", name = "grpc-testing", version = "1.78.0" }
 grpc-okhttp = { group = "io.grpc", name = "grpc-okhttp", version = "1.78.0" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.12.2" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version = "1.10.0" }
@@ -81,3 +85,4 @@ jib = { id = "com.google.cloud.tools.jib", version = "3.5.2" }
 kotlinAndroidKsp = { id = "com.google.devtools.ksp", version.ref ="kspVersion" }
 hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref ="hiltVersion" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "google" }
+crashAnalytics = { id = "com.google.firebase.crashlytics", version = "3.0.6"}

@@ -26,25 +26,21 @@ message CreateUserRequest {
 
 message CreateUserResponse {
   StatusCode status = 1;
-  string user_id = 2; // server generated id if not supplied
+  GrpcUser user = 2;
   string message = 3;
 }
 
 // List users
-message ListUsersRequest {
-  // optional filters in future (search, limit, offset)
-  int32 limit = 1;
-  int32 offset = 2;
-}
+message ListUsersRequest {}
 
-message User {
+message GrpcUser {
   string user_id = 1;
   reserved 2;
   string display_name = 3;
 }
 
 message ListUsersResponse {
-  repeated User users = 1;
+  repeated GrpcUser users = 1;
 }
 
 // Device token management (for FCM)

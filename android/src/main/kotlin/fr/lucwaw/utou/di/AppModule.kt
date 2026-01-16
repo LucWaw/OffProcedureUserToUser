@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import fr.lucwaw.utou.data.repository.GrpcUserRepository
+import fr.lucwaw.utou.data.repository.OffFirstUserRepository
 import fr.lucwaw.utou.data.repository.UserRepository
 import fr.lucwaw.utou.ping.PingServiceGrpcKt
 import fr.lucwaw.utou.user.UserServiceGrpcKt
@@ -20,7 +20,7 @@ object GrpcModule {
     @Singleton
     fun provideChannel(): ManagedChannel =
         ManagedChannelBuilder
-            .forAddress("10.0.2.2", 50052)
+            .forAddress("localhost", 8080)
             .usePlaintext()
             .build()
 
@@ -40,6 +40,6 @@ object GrpcModule {
         stub: UserServiceGrpcKt.UserServiceCoroutineStub,
         pingStub: PingServiceGrpcKt.PingServiceCoroutineStub
     ): UserRepository {
-        return GrpcUserRepository(stub, pingStub)
+        return OffFirstUserRepository(stub, pingStub)
     }
 }

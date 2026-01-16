@@ -18,11 +18,11 @@ class UserPingClient(
     suspend fun createUser(displayName: String): String {
         val request = createUserRequest { this.displayName = displayName }
         val response = userStub.createUser(request)
-        println("CreateUser status=${response.status}, userId=${response.userId}")
-        return response.userId
+        println("CreateUser status=${response.status}, userId=${response.user.userId}")
+        return response.user.userId
     }
 
-    suspend fun listUsers(): List<User> {
+    suspend fun listUsers(): List<GrpcUser> {
         val request = listUsersRequest {}
         val response = userStub.listUsers(request)
         println("ListUsers: ${response.usersList}")

@@ -1,4 +1,4 @@
-package fr.lucwaw.utou.domain
+package fr.lucwaw.utou.domain.usecase
 
 import fr.lucwaw.utou.data.repository.UserRepository
 import fr.lucwaw.utou.domain.modele.SendPingResult
