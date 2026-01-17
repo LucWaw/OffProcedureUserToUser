@@ -8,12 +8,13 @@ import fr.lucwaw.utou.domain.modele.SyncStatus
 import kotlin.time.Instant
 
 
-@Entity(tableName = "users", indices = [Index(value = ["userId"], unique = true)])
+@Entity(tableName = "users", indices = [Index(value = ["userGUID"], unique = true)])
 data class UserEntity(
     @PrimaryKey(autoGenerate = true) val id: Long,
-    @ColumnInfo(name = "userId") val userId: String?,
+    @ColumnInfo(name = "userGUID") val userGUID: String?,
     val name: String,
     val cachedAt: Instant,
+    val updatedAt: Instant,
     val syncStatus: SyncStatus,
-    val isLocalUser: Boolean
+    val isActualUser: Boolean
 )

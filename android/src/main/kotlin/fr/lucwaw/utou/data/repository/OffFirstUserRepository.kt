@@ -12,14 +12,11 @@ import fr.lucwaw.utou.domain.modele.toDomain
 import fr.lucwaw.utou.domain.modele.toEntity
 import fr.lucwaw.utou.ping.PingServiceGrpcKt
 import fr.lucwaw.utou.ping.sendPingRequest
-import fr.lucwaw.utou.user.RegisterDeviceResponse
 import fr.lucwaw.utou.user.UserServiceGrpcKt
 import fr.lucwaw.utou.user.createUserRequest
 import fr.lucwaw.utou.user.listUsersRequest
 import fr.lucwaw.utou.user.registerDeviceRequest
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import utou.v1.Common
 import java.util.UUID
@@ -39,15 +36,8 @@ class OffFirstUserRepository @Inject constructor(
 
     override suspend fun refreshUsers() {
         try {
-            val localUserId = userDao.getLocalUserId()
-
             val remoteUsers = stub.listUsers(listUsersRequest {})
-
-            val entities = remoteUsers.usersList.map {
-                it.toEntity(localUserId)
-            }
-
-            userDao.insertUsers(entities)
+            userDao.refreshLww(remoteUsers.usersList)
         } catch (e: Exception) {
             // silent fail, cache data stays visible
             Log.d("OffFirstRepository", "Error while syncing users, \n error :$e")
@@ -56,26 +46,32 @@ class OffFirstUserRepository @Inject constructor(
 
 
     override suspend fun registerUser(userName: String): CreateUserResult {
-        val tempId = UUID.randomUUID().toString()
-        val tempUser = UserEntity(
-            userId = tempId,
-            name = userName,
-            cachedAt = Clock.System.now(),
+        val now = Clock.System.now()
+
+        userDao.insert(UserEntity(
+            id = 0L,
+            userGUID = "",
+            name =userName,
+            cachedAt = now,
+            updatedAt = now,
             syncStatus = SyncStatus.FALSE,
-            isLocalUser = true
-        )
-        userDao.insertUser(tempUser)
+            isActualUser = true
+        ))
 
         try {
             val response = stub.createUser(
                 createUserRequest { displayName = userName }
             )
-
-            val updatedUser = tempUser.copy(
-                userId = response.user.userId,
-                syncStatus = SyncStatus.SYNCED
+            if (response.status != Common.StatusCode.STATUS_OK){
+                throw IllegalStateException(response.message)
+            }
+            val responseUserEntity = response.user.toEntity().copy(isActualUser = true)
+            userDao.updateFromRemoteGUID(
+                name = TODO(),
+                updatedAt = TODO(),
+                cachedAt = TODO(),
+                userGUID = responseUserEntity.userGUID
             )
-            userDao.updateUser(updatedUser)
 
             return CreateUserResult(
                 status = response.status,

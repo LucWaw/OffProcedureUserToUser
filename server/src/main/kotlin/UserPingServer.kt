@@ -10,11 +10,11 @@ import fr.lucwaw.utou.ping.SendPingResponse
 import fr.lucwaw.utou.ping.sendPingResponse
 import fr.lucwaw.utou.user.CreateUserRequest
 import fr.lucwaw.utou.user.CreateUserResponse
+import fr.lucwaw.utou.user.GrpcUser
 import fr.lucwaw.utou.user.ListUsersRequest
 import fr.lucwaw.utou.user.ListUsersResponse
 import fr.lucwaw.utou.user.RegisterDeviceRequest
 import fr.lucwaw.utou.user.RegisterDeviceResponse
-import fr.lucwaw.utou.user.GrpcUser
 import fr.lucwaw.utou.user.UserServiceGrpcKt
 import fr.lucwaw.utou.user.createUserResponse
 import fr.lucwaw.utou.user.listUsersResponse
@@ -24,6 +24,7 @@ import io.grpc.ServerBuilder
 import utou.v1.Common
 import java.io.FileInputStream
 import java.util.UUID
+import kotlin.time.Clock
 
 
 class UserPingServer(private val port: Int) {
@@ -74,8 +75,12 @@ class UserPingServer(private val port: Int) {
         override suspend fun createUser(request: CreateUserRequest): CreateUserResponse {
             println("Creating user")
             var statusCode = Common.StatusCode.STATUS_OK
-            val user = GrpcUser.newBuilder().setUserId(UUID.randomUUID().toString())
-                .setDisplayName(request.displayName).build()
+            val user = GrpcUser.newBuilder()
+                .setUserGUID(UUID.randomUUID().toString())
+                .setDisplayName(request.displayName)
+                .setUpdatedAt(Clock.System.now().toEpochMilliseconds())
+                .build()
+
             if (!listOfUsers.contains(user)) {
                 listOfUsers.add(user)
             } else {
@@ -113,7 +118,7 @@ class UserPingServer(private val port: Int) {
             }
 
             // L'utilisateur existe-t-il ?
-            val userExists = listOfUsers.any { it.userId == userId }
+            val userExists = listOfUsers.any { it.userGUID == userId }
             if (!userExists) {
                 return registerDeviceResponse {
                     status = Common.StatusCode.STATUS_NOT_FOUND
@@ -145,8 +150,8 @@ internal class PingService(
         val userId = request.toUserId
 
         // Vérifier que l'utilisateur existe et qu'il a un device
-        val receiver = listOfUsers.find { it.userId == userId }
-        val sender = listOfUsers.find { it.userId == request.fromUserId }
+        val receiver = listOfUsers.find { it.userGUID == userId }
+        val sender = listOfUsers.find { it.userGUID == request.fromUserId }
         val device = devices[userId]
 
         val status = if (receiver == null || device == null) {

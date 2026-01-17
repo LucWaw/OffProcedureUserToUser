@@ -34,9 +34,10 @@ message CreateUserResponse {
 message ListUsersRequest {}
 
 message GrpcUser {
-  string user_id = 1;
+  string user_GUID = 1;
   reserved 2;
   string display_name = 3;
+  int64 updatedAt = 4;
 }
 
 message ListUsersResponse {

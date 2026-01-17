@@ -6,28 +6,36 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 data class User(
-    val userId: String?,
+    val id: Long,
+    val userGUID: String?,
     val name: String,
     val cachedAt: Instant,
-    val syncStatus: SyncStatus
+    val updatedAt: Instant,
+    val syncStatus: SyncStatus,
+    val isActualUser: Boolean
 )
 
 fun UserEntity.toDomain(): User {
     return User(
-        userId = this.userId,
+        id = this.id,
+        userGUID = this.userGUID,
         name = this.name,
         cachedAt = this.cachedAt,
-        syncStatus = this.syncStatus
+        updatedAt = this.updatedAt,
+        syncStatus = this.syncStatus,
+        isActualUser = this.isActualUser
     )
 }
 
-fun GrpcUser.toEntity(localUserId: String? = ""): UserEntity {
+fun GrpcUser.toEntity(localUserGUID: String? = null): UserEntity {
+    val now = Clock.System.now()
     return UserEntity(
         id = 0L,
-        userId = this.userId,
+        userGUID = this.userGUID,
         name = this.displayName,
-        cachedAt = Clock.System.now(),
+        cachedAt = now,
+        updatedAt = Instant.fromEpochMilliseconds(this.updatedAt),
         syncStatus = SyncStatus.SYNCED,
-        isLocalUser = localUserId == this.userId,
+        isActualUser = localUserGUID != null && localUserGUID == this.userGUID
     )
 }
