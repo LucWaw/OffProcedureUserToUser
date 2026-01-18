@@ -42,7 +42,6 @@ interface UserDao {
     """
     )
     suspend fun updateFromRemoteGUID(
-        id: Long,
         name: String,
         updatedAt: Instant,
         cachedAt: Instant,

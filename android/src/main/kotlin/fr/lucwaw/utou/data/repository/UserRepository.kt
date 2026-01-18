@@ -4,15 +4,22 @@ import fr.lucwaw.utou.domain.modele.CreateDeviceResult
 import fr.lucwaw.utou.domain.modele.CreateUserResult
 import fr.lucwaw.utou.domain.modele.SendPingResult
 import fr.lucwaw.utou.domain.modele.User
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 interface UserRepository {
 
+    val users: Flow<List<User>>
+
+    var lastTokenGenerated: String
+
     suspend fun refreshUsers()
+
+    suspend fun getActualUserGUID(): String?
 
     suspend fun registerUser(userName: String): CreateUserResult
 
     suspend fun registerDevice(generatedFcmToken: String): CreateDeviceResult
 
-    suspend fun sendPing(toUserId: String): SendPingResult
+    suspend fun sendPing(toUserGUID: String): SendPingResult
 }

@@ -7,7 +7,7 @@ import javax.inject.Inject
 class GetUsersFlowUseCase @Inject constructor(
     private val repo: UserRepository
 ){
-    operator fun invoke() = repo.usersFlow
+    operator fun invoke() = repo.users
 }
 
 class RefreshUsersUseCase @Inject constructor(

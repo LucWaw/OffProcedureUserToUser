@@ -10,10 +10,10 @@ class PingUserUseCase @Inject constructor(
     /**
      * Exécute un ping pour afficher une notification à un utilisateur.
      *
-     * @param toUserId l'id de la cible
+     * @param toUserGUID l'id de la cible
      * @return SendPingResult retourné par le repository
      */
-    suspend fun execute(toUserId: String): SendPingResult {
-        return userRepository.sendPing(toUserId)
+    suspend fun execute(toUserGUID: String): SendPingResult {
+        return userRepository.sendPing(toUserGUID)
     }
 }

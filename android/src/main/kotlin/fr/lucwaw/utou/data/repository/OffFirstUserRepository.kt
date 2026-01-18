@@ -9,7 +9,6 @@ import fr.lucwaw.utou.domain.modele.SendPingResult
 import fr.lucwaw.utou.domain.modele.SyncStatus
 import fr.lucwaw.utou.domain.modele.User
 import fr.lucwaw.utou.domain.modele.toDomain
-import fr.lucwaw.utou.domain.modele.toEntity
 import fr.lucwaw.utou.ping.PingServiceGrpcKt
 import fr.lucwaw.utou.ping.sendPingRequest
 import fr.lucwaw.utou.user.UserServiceGrpcKt
@@ -19,9 +18,9 @@ import fr.lucwaw.utou.user.registerDeviceRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import utou.v1.Common
-import java.util.UUID
 import javax.inject.Inject
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 class OffFirstUserRepository @Inject constructor(
     private val stub: UserServiceGrpcKt.UserServiceCoroutineStub,
@@ -29,7 +28,9 @@ class OffFirstUserRepository @Inject constructor(
     private val userDao: UserDao
 ) : UserRepository {
 
-    val users: Flow<List<User>> =
+    override lateinit var lastTokenGenerated: String
+
+    override val users: Flow<List<User>> =
         userDao.getUsers().map { entities ->
             entities.map { it.toDomain() }
         }
@@ -44,71 +45,92 @@ class OffFirstUserRepository @Inject constructor(
         }
     }
 
+    override suspend fun getActualUserGUID(): String? {
+        return userDao.getActualUserGUID()
+    }
+
 
     override suspend fun registerUser(userName: String): CreateUserResult {
         val now = Clock.System.now()
 
-        userDao.insert(UserEntity(
-            id = 0L,
-            userGUID = "",
-            name =userName,
-            cachedAt = now,
-            updatedAt = now,
-            syncStatus = SyncStatus.FALSE,
-            isActualUser = true
-        ))
+        userDao.insert(
+            UserEntity(
+                id = 0L,
+                userGUID = "",
+                name = userName,
+                cachedAt = now,
+                updatedAt = now,
+                syncStatus = SyncStatus.FALSE,
+                isActualUser = true
+            )
+        )
 
         try {
             val response = stub.createUser(
                 createUserRequest { displayName = userName }
             )
-            if (response.status != Common.StatusCode.STATUS_OK){
+            if (response.status != Common.StatusCode.STATUS_OK) {
                 throw IllegalStateException(response.message)
             }
-            val responseUserEntity = response.user.toEntity().copy(isActualUser = true)
             userDao.updateFromRemoteGUID(
-                name = TODO(),
-                updatedAt = TODO(),
-                cachedAt = TODO(),
-                userGUID = responseUserEntity.userGUID
+                name = response.user.displayName,
+                updatedAt = Instant.fromEpochMilliseconds(response.user.updatedAt),
+                cachedAt = Clock.System.now(),
+                userGUID = response.user.userGUID
             )
+            registerDevice(lastTokenGenerated)
 
             return CreateUserResult(
                 status = response.status,
-                userId = response.user.userId,
+                userId = response.user.userGUID,
                 message = response.message
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return CreateUserResult(
                 status = Common.StatusCode.STATUS_ERROR,
-                userId = tempId,
+                userId = "",
                 message = "Offline / pending sync"
             )
         }
     }
 
     override suspend fun registerDevice(generatedFcmToken: String): CreateDeviceResult {
+        val generatedGUID = userDao.getActualUserGUID() ?: return CreateDeviceResult(
+            Common.StatusCode.STATUS_ERROR,
+            "actual userGUID Not Found"
+        )
+        if (generatedGUID.isBlank()) {
+            return CreateDeviceResult(
+                Common.StatusCode.STATUS_ERROR,
+                "The user sending the ping needs to register online earlier."
+            )
+        }
         val response = stub.registerDevice(
             registerDeviceRequest {
-                userId = generatedUserId
+                userId = generatedGUID
                 fcmToken = generatedFcmToken
             })
+
         return CreateDeviceResult(
             status = response.status, message = response.message
         )
     }
 
-    override suspend fun sendPing(toUserId: String): SendPingResult {
-        if(generatedUserId.isBlank()){
+    override suspend fun sendPing(toUserGUID: String): SendPingResult {
+        val generatedGUID = userDao.getActualUserGUID() ?: return SendPingResult(
+            Common.StatusCode.STATUS_ERROR,
+            "actual userGUID Not Found"
+        )
+        if (generatedGUID.isBlank()) {
             return SendPingResult(
                 Common.StatusCode.STATUS_ERROR,
-                "The user sending the ping needs to register earlier."
+                "The user sending the ping needs to register online earlier."
             )
         }
 
         val request = sendPingRequest {
-            this.fromUserId = generatedUserId
-            this.toUserId = toUserId
+            this.fromUserId = generatedGUID
+            this.toUserId = toUserGUID
         }
 
         val response = pingStub.sendPing(request)
