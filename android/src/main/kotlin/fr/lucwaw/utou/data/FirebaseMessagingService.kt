@@ -28,8 +28,8 @@ class FMService : FirebaseMessagingService() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val userId : String = repository.getActualUserGUID().toString()
-                if (userId != "null" && userId.isNotBlank()) {
+                val userId : String? = repository.getActualUserGUID()
+                if (userId != null && userId.isNotBlank()) {
                     repository.registerDevice(token)
                     Log.d("FCM", "Token envoyé au backend")
                 } else {

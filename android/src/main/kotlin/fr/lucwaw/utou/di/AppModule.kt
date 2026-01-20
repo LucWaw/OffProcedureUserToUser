@@ -1,9 +1,14 @@
 package fr.lucwaw.utou.di
 
+import android.content.Context
+import androidx.room.Room
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import fr.lucwaw.utou.data.AppDatabase
+import fr.lucwaw.utou.data.dao.UserDao
 import fr.lucwaw.utou.data.repository.OffFirstUserRepository
 import fr.lucwaw.utou.data.repository.UserRepository
 import fr.lucwaw.utou.ping.PingServiceGrpcKt
@@ -16,30 +21,42 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object GrpcModule {
 
-    @Provides
     @Singleton
+    @Provides
     fun provideChannel(): ManagedChannel =
         ManagedChannelBuilder
             .forAddress("localhost", 8080)
             .usePlaintext()
             .build()
-
-    @Provides
     @Singleton
+    @Provides
     fun provideUserStub(channel: ManagedChannel): UserServiceGrpcKt.UserServiceCoroutineStub =
         UserServiceGrpcKt.UserServiceCoroutineStub(channel)
 
-    @Provides
     @Singleton
+    @Provides
     fun providePingStub(channel: ManagedChannel): PingServiceGrpcKt.PingServiceCoroutineStub =
         PingServiceGrpcKt.PingServiceCoroutineStub(channel)
 
-    @Provides
     @Singleton
+    @Provides
+    fun provideAppDatabase(
+        @ApplicationContext app: Context
+    ) =  Room.databaseBuilder(
+            app, AppDatabase::class.java, "AppDatabase",
+        ).build()
+
+    @Singleton
+    @Provides
+    fun provideUserDao(db: AppDatabase) = db.userDao()
+
+    @Singleton
+    @Provides
     fun provideUserRepository(
         stub: UserServiceGrpcKt.UserServiceCoroutineStub,
-        pingStub: PingServiceGrpcKt.PingServiceCoroutineStub
+        pingStub: PingServiceGrpcKt.PingServiceCoroutineStub,
+        userDao: UserDao
     ): UserRepository {
-        return OffFirstUserRepository(stub, pingStub)
+        return OffFirstUserRepository(stub, pingStub, userDao)
     }
 }

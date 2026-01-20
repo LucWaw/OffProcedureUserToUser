@@ -8,10 +8,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import fr.lucwaw.utou.databinding.ItemUserBinding
-import fr.lucwaw.utou.user.GrpcUser
+import fr.lucwaw.utou.domain.modele.User
 
 class UserAdapter(private val listener: OnUserClickListener) :
-    ListAdapter<GrpcUser, UserAdapter.UserViewHolder>(
+    ListAdapter<User, UserAdapter.UserViewHolder>(
         DIFF_CALLBACK
     ) {
 
@@ -19,7 +19,7 @@ class UserAdapter(private val listener: OnUserClickListener) :
         var name: TextView = binding.name
 
 
-        fun bind(user: GrpcUser, listener: OnUserClickListener) {
+        fun bind(user: User, listener: OnUserClickListener) {
             itemView.setOnClickListener {
                 listener.onUserClick(user)
             }
@@ -28,7 +28,7 @@ class UserAdapter(private val listener: OnUserClickListener) :
 
     interface OnUserClickListener {
 
-        fun onUserClick(user: GrpcUser)
+        fun onUserClick(user: User)
 
     }
 
@@ -45,7 +45,7 @@ class UserAdapter(private val listener: OnUserClickListener) :
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
         val user = getItem(position)
 
-        holder.name.text = user.displayName
+        holder.name.text = user.name
 
         holder.bind(user, listener)
 
@@ -53,13 +53,13 @@ class UserAdapter(private val listener: OnUserClickListener) :
 
 
     companion object {
-        private val DIFF_CALLBACK: DiffUtil.ItemCallback<GrpcUser> =
-            object : DiffUtil.ItemCallback<GrpcUser>() {
-                override fun areItemsTheSame(oldItem: GrpcUser, newItem: GrpcUser): Boolean {
+        private val DIFF_CALLBACK: DiffUtil.ItemCallback<User> =
+            object : DiffUtil.ItemCallback<User>() {
+                override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
                     return oldItem === newItem
                 }
 
-                override fun areContentsTheSame(oldItem: GrpcUser, newItem: GrpcUser): Boolean {
+                override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
                     return oldItem == newItem
                 }
             }

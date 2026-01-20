@@ -19,6 +19,7 @@ coreKtx = "1.17.0"
 google = "4.4.4"
 room = "2.8.4"
 swiperefreshlayout = "1.2.0"
+workRuntimeKtx = "2.11.0"
 
 [libraries]
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.12.01" }
@@ -28,6 +29,7 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebaseAdmin" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
