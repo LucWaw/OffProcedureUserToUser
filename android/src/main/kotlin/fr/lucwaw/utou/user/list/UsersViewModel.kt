@@ -5,11 +5,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import fr.lucwaw.utou.domain.usecase.GetUsersFlowUseCase
 import fr.lucwaw.utou.domain.usecase.PingUserUseCase
-import fr.lucwaw.utou.domain.usecase.RefreshUsersUseCase
+import fr.lucwaw.utou.domain.usecase.ScheduleOneTimeRefreshUseCase
+import fr.lucwaw.utou.domain.usecase.SchedulePeriodicRefreshUseCase
+import fr.lucwaw.utou.domain.usecase.ScheduleUpdateToken
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import utou.v1.Common
@@ -19,7 +19,9 @@ import javax.inject.Inject
 @HiltViewModel
 class UsersViewModel @Inject constructor(
     getUsersFlowUseCase: GetUsersFlowUseCase,
-    private val refreshUsersUseCase: RefreshUsersUseCase,
+    private val schedulePeriodicRefreshUseCase: SchedulePeriodicRefreshUseCase,
+    private val scheduleOneTimeRefreshUseCase: ScheduleOneTimeRefreshUseCase,
+    private val scheduleUpdateToken: ScheduleUpdateToken,
     private val pingUserUseCase: PingUserUseCase
 ) : ViewModel() {
     val usersFlow = getUsersFlowUseCase()
@@ -29,20 +31,17 @@ class UsersViewModel @Inject constructor(
             emptyList()
         )
 
-    private val _refreshing = MutableStateFlow(false)
-    val refreshing = _refreshing.asStateFlow()
 
-    fun refresh() {
-        viewModelScope.launch {
-            try {
-                _refreshing.value = true
-                refreshUsersUseCase()
-            } catch(_: Exception){
-                // optionnel : log / toast Event
-            } finally {
-                _refreshing.value = false
-            }
-        }
+    fun refresh(){
+        scheduleOneTimeRefreshUseCase()
+    }
+
+    fun periodicRefresh(){
+        schedulePeriodicRefreshUseCase()
+    }
+
+    fun updateToken(){
+        scheduleUpdateToken()
     }
 
     private val _toastEvent = MutableSharedFlow<String>()

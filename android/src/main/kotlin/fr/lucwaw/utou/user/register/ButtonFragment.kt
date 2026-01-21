@@ -1,8 +1,6 @@
 package fr.lucwaw.utou.user.register
 
-import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.text.InputType
 import android.view.LayoutInflater
@@ -17,8 +15,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import fr.lucwaw.utou.databinding.FragmentButtonBinding
-import fr.lucwaw.utou.databinding.RecyclerUsersBinding
-import fr.lucwaw.utou.user.list.UsersViewModel
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
@@ -65,14 +61,11 @@ class ButtonFragment : Fragment() {
 
             builder.setPositiveButton(
                 "OK"
-            ) { dialog, which ->
+            ) { _, _ ->
                 viewModel.register(input.text.toString())
             }
-            builder.setNegativeButton("Cancel", object : DialogInterface.OnClickListener {
-                override fun onClick(dialog: DialogInterface, which: Int) {
-                    dialog.cancel()
-                }
-            })
+            builder.setNegativeButton("Cancel"
+            ) { dialog, _ -> dialog.cancel() }
             builder.show()
         }
     }

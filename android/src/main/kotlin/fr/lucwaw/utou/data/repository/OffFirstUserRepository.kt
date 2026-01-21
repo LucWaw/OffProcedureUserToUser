@@ -3,6 +3,7 @@ package fr.lucwaw.utou.data.repository
 import android.util.Log
 import fr.lucwaw.utou.data.dao.UserDao
 import fr.lucwaw.utou.data.entity.UserEntity
+import fr.lucwaw.utou.data.workers.SyncScheduler
 import fr.lucwaw.utou.domain.modele.CreateDeviceResult
 import fr.lucwaw.utou.domain.modele.CreateUserResult
 import fr.lucwaw.utou.domain.modele.SendPingResult
@@ -25,7 +26,8 @@ import kotlin.time.Instant
 class OffFirstUserRepository @Inject constructor(
     private val stub: UserServiceGrpcKt.UserServiceCoroutineStub,
     private val pingStub: PingServiceGrpcKt.PingServiceCoroutineStub,
-    private val userDao: UserDao
+    private val userDao: UserDao,
+    private val syncScheduler: SyncScheduler
 ) : UserRepository {
 
     override lateinit var lastTokenGenerated: String
@@ -34,6 +36,18 @@ class OffFirstUserRepository @Inject constructor(
         userDao.getUsers().map { entities ->
             entities.map { it.toDomain() }
         }
+
+    override fun scheduleRefresh(){
+        syncScheduler.scheduleOnetimeRefreshSync()
+    }
+
+    override fun schedulePeriodicSync(){
+        syncScheduler.schedulePeriodicSync()
+    }
+
+    override fun scheduleUpdateToken() {
+        syncScheduler.scheduleUpdateToken()
+    }
 
     override suspend fun refreshUsers() {
         try {
@@ -49,22 +63,7 @@ class OffFirstUserRepository @Inject constructor(
         return userDao.getActualUserGUID()
     }
 
-
-    override suspend fun registerUser(userName: String): CreateUserResult {
-        val now = Clock.System.now()
-
-        userDao.insert(
-            UserEntity(
-                id = 0L,
-                userGUID = "",
-                name = userName,
-                cachedAt = now,
-                updatedAt = now,
-                syncStatus = SyncStatus.FALSE,
-                isActualUser = true
-            )
-        )
-
+    override suspend fun syncRegisteredUser(userName: String): CreateUserResult {
         try {
             val response = stub.createUser(
                 createUserRequest { displayName = userName }
@@ -72,8 +71,8 @@ class OffFirstUserRepository @Inject constructor(
             if (response.status != Common.StatusCode.STATUS_OK) {
                 throw IllegalStateException(response.message)
             }
-            userDao.updateFromRemoteGUID(
-                name = response.user.displayName,
+            userDao.updateFromUserName(
+                name = userName,
                 updatedAt = Instant.fromEpochMilliseconds(response.user.updatedAt),
                 cachedAt = Clock.System.now(),
                 userGUID = response.user.userGUID
@@ -94,6 +93,24 @@ class OffFirstUserRepository @Inject constructor(
         }
     }
 
+    override suspend fun registerUser(userName: String) {
+        val now = Clock.System.now()
+
+        userDao.insert(
+            UserEntity(
+                id = 0L,
+                userGUID = "",
+                name = userName,
+                cachedAt = now,
+                updatedAt = now,
+                syncStatus = SyncStatus.FALSE,
+                isActualUser = true
+            )
+        )
+
+        syncScheduler.scheduleOneTimeRegisterSync(userName)
+    }
+
     override suspend fun registerDevice(generatedFcmToken: String): CreateDeviceResult {
         val generatedGUID = userDao.getActualUserGUID() ?: return CreateDeviceResult(
             Common.StatusCode.STATUS_ERROR,
@@ -102,7 +119,7 @@ class OffFirstUserRepository @Inject constructor(
         if (generatedGUID.isBlank()) {
             return CreateDeviceResult(
                 Common.StatusCode.STATUS_ERROR,
-                "The user sending the ping needs to register online earlier."
+                "The user trying to register token needs to register online earlier."
             )
         }
         val response = stub.registerDevice(

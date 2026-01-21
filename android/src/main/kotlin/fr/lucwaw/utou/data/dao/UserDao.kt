@@ -9,7 +9,6 @@ import fr.lucwaw.utou.domain.modele.toEntity
 import fr.lucwaw.utou.user.GrpcUser
 import kotlinx.coroutines.flow.Flow
 import kotlin.collections.map
-import kotlin.time.Clock
 import kotlin.time.Instant
 
 @Dao
@@ -35,13 +34,13 @@ interface UserDao {
     @Query(
         """
         UPDATE users
-        SET name = :name,
-            updatedAt = :updatedAt,
-            cachedAt = :cachedAt
-        WHERE userGUID = :userGUID
+        SET updatedAt = :updatedAt,
+            cachedAt = :cachedAt,
+            userGUID = :userGUID
+        WHERE name=:name
     """
     )
-    suspend fun updateFromRemoteGUID(
+    suspend fun updateFromUserName(
         name: String,
         updatedAt: Instant,
         cachedAt: Instant,

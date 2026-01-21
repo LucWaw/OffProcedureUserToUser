@@ -4,8 +4,8 @@ import fr.lucwaw.utou.data.repository.UserRepository
 import javax.inject.Inject
 
 
-class GetUsersFlowUseCase @Inject constructor(
+class SchedulePeriodicRefreshUseCase @Inject constructor(
     private val repo: UserRepository
 ){
-    operator fun invoke() = repo.users
+    operator fun invoke() = repo.schedulePeriodicSync()
 }

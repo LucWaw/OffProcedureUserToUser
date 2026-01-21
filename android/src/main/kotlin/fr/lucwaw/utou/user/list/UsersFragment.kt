@@ -48,7 +48,7 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
         return binding.root
     }
 
-    fun observeSendingPing(){
+    fun observeSendingPing() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.toastEvent.collect { message ->
@@ -121,19 +121,8 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
             viewModel.refresh()
         }
 
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.refreshing.collect {
-                    binding.swipeRefresh.isRefreshing = it
-                }
-            }
-        }
-
-
-        // premier chargement
-        viewModel.refresh()
-
-
+        viewModel.periodicRefresh()
+        viewModel.updateToken()
     }
 
 

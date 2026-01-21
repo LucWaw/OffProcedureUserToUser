@@ -5,7 +5,6 @@ import fr.lucwaw.utou.domain.modele.CreateUserResult
 import fr.lucwaw.utou.domain.modele.SendPingResult
 import fr.lucwaw.utou.domain.modele.User
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 
 interface UserRepository {
 
@@ -17,9 +16,16 @@ interface UserRepository {
 
     suspend fun getActualUserGUID(): String?
 
-    suspend fun registerUser(userName: String): CreateUserResult
+    suspend fun registerUser(userName: String)
+
+    fun scheduleRefresh()
+
+    fun schedulePeriodicSync()
+
+    fun scheduleUpdateToken()
 
     suspend fun registerDevice(generatedFcmToken: String): CreateDeviceResult
 
     suspend fun sendPing(toUserGUID: String): SendPingResult
+    suspend fun syncRegisteredUser(userName: String): CreateUserResult
 }
