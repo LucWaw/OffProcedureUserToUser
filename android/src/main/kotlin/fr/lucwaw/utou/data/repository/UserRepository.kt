@@ -16,7 +16,7 @@ interface UserRepository {
 
     suspend fun getActualUserGUID(): String?
 
-    suspend fun registerUser(userName: String)
+    suspend fun registerUser(userName: String): Boolean
 
     fun scheduleRefresh()
 
@@ -27,5 +27,6 @@ interface UserRepository {
     suspend fun registerDevice(generatedFcmToken: String): CreateDeviceResult
 
     suspend fun sendPing(toUserGUID: String): SendPingResult
-    suspend fun syncRegisteredUser(userName: String): CreateUserResult
+    suspend fun syncRegisteredUser(userName: String, userIdInput: Long): CreateUserResult
+    fun blanck()
 }

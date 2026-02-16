@@ -3,11 +3,13 @@ package fr.lucwaw.utou.user.list
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import fr.lucwaw.utou.databinding.ItemUserBinding
+import fr.lucwaw.utou.domain.modele.SyncStatus
 import fr.lucwaw.utou.domain.modele.User
 
 class UserAdapter(private val listener: OnUserClickListener) :
@@ -17,6 +19,7 @@ class UserAdapter(private val listener: OnUserClickListener) :
 
     class UserViewHolder(binding: ItemUserBinding) : RecyclerView.ViewHolder(binding.root) {
         var name: TextView = binding.name
+        var statusIcon: ImageView = binding.syncStatusIcon
 
 
         fun bind(user: User, listener: OnUserClickListener) {
@@ -46,6 +49,13 @@ class UserAdapter(private val listener: OnUserClickListener) :
         val user = getItem(position)
 
         holder.name.text = user.name
+        val iconRes = when (user.syncStatus) {
+            SyncStatus.SYNCED -> android.R.drawable.presence_online
+            SyncStatus.ERROR -> android.R.drawable.presence_busy
+            SyncStatus.PENDING_UPLOAD -> android.R.drawable.presence_invisible
+        }
+
+        holder.statusIcon.setImageResource(iconRes)
 
         holder.bind(user, listener)
 

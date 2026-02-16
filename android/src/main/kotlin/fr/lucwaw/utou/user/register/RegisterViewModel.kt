@@ -20,11 +20,8 @@ class RegisterViewModel @Inject constructor(
     fun register(userName: String) {
         viewModelScope.launch {
             val result = registerUserUseCase.execute(userName)
-            val message = when(result.status) {
-                Common.StatusCode.STATUS_OK -> "Utilisateur créé"
-                Common.StatusCode.STATUS_ALREADY_EXISTS -> "Utilisateur déjà existant"
-                else -> "Erreur"
-            }
+            val message = if(result) "Utilisateur créé" else "Utilisateur déjà existant"
+
             _toastEvent.emit(message)
         }
     }

@@ -1,6 +1,7 @@
 package fr.lucwaw.utou.data.workers
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.firebase.Firebase
@@ -22,7 +23,9 @@ class UpdateTokenWorker @Inject constructor(
             repository.registerDevice(token)
 
             Result.success()
-        } catch (_: Exception){
+        } catch (e: Exception){
+            Log.d("WORKER TOKEN", e.toString())
+
             Result.retry()
         }
     }

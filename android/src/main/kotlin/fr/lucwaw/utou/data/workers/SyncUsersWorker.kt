@@ -1,6 +1,7 @@
 package fr.lucwaw.utou.data.workers
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import fr.lucwaw.utou.data.repository.UserRepository
@@ -16,7 +17,9 @@ class SyncUsersWorker @Inject constructor(
         return try {
             repository.refreshUsers()
             Result.success()
-        } catch (_: Exception){
+        } catch (e: Exception){
+            Log.d("WORKER USERS", e.toString())
+
             Result.retry()
         }
     }

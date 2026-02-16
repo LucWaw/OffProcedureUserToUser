@@ -13,7 +13,7 @@ class RegisterUserUseCase @Inject constructor(
      * @param userName le nom à enregistrer
      * @return CreateUserResult retourné par le repository
      */
-    suspend fun execute(userName: String): CreateUserResult {
+    suspend fun execute(userName: String): Boolean {
         return userRepository.registerUser(userName)
     }
 }

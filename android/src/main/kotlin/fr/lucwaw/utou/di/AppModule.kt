@@ -11,6 +11,8 @@ import fr.lucwaw.utou.data.AppDatabase
 import fr.lucwaw.utou.data.dao.UserDao
 import fr.lucwaw.utou.data.repository.OffFirstUserRepository
 import fr.lucwaw.utou.data.repository.UserRepository
+import fr.lucwaw.utou.data.workers.SyncScheduler
+import fr.lucwaw.utou.data.workers.SyncUsersWorker
 import fr.lucwaw.utou.ping.PingServiceGrpcKt
 import fr.lucwaw.utou.user.UserServiceGrpcKt
 import io.grpc.ManagedChannel
@@ -28,6 +30,7 @@ object GrpcModule {
             .forAddress("localhost", 8080)
             .usePlaintext()
             .build()
+
     @Singleton
     @Provides
     fun provideUserStub(channel: ManagedChannel): UserServiceGrpcKt.UserServiceCoroutineStub =
@@ -42,9 +45,9 @@ object GrpcModule {
     @Provides
     fun provideAppDatabase(
         @ApplicationContext app: Context
-    ) =  Room.databaseBuilder(
-            app, AppDatabase::class.java, "AppDatabase",
-        ).build()
+    ) = Room.databaseBuilder(
+        app, AppDatabase::class.java, "AppDatabase",
+    ).build()
 
     @Singleton
     @Provides
@@ -52,11 +55,19 @@ object GrpcModule {
 
     @Singleton
     @Provides
+    fun provideSyncScheduler(@ApplicationContext app: Context): SyncScheduler {
+        return SyncScheduler(app)
+    }
+
+
+    @Singleton
+    @Provides
     fun provideUserRepository(
         stub: UserServiceGrpcKt.UserServiceCoroutineStub,
         pingStub: PingServiceGrpcKt.PingServiceCoroutineStub,
-        userDao: UserDao
+        userDao: UserDao,
+        syncScheduler: SyncScheduler
     ): UserRepository {
-        return OffFirstUserRepository(stub, pingStub, userDao)
+        return OffFirstUserRepository(stub, pingStub, userDao, syncScheduler)
     }
 }

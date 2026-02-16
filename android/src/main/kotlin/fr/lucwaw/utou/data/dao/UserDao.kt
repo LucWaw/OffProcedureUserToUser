@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import fr.lucwaw.utou.data.entity.UserEntity
+import fr.lucwaw.utou.domain.modele.SyncStatus
 import fr.lucwaw.utou.domain.modele.toEntity
 import fr.lucwaw.utou.user.GrpcUser
 import kotlinx.coroutines.flow.Flow
@@ -29,38 +30,24 @@ interface UserDao {
     suspend fun getByRemoteUuids(uuids: List<String>): List<UserEntity>
 
     @Insert
-    suspend fun insert(user: UserEntity)
-
-    @Query(
-        """
-        UPDATE users
-        SET updatedAt = :updatedAt,
-            cachedAt = :cachedAt,
-            userGUID = :userGUID
-        WHERE name=:name
-    """
-    )
-    suspend fun updateFromUserName(
-        name: String,
-        updatedAt: Instant,
-        cachedAt: Instant,
-        userGUID: String
-    )
+    suspend fun insert(user: UserEntity): Long
 
     @Query("""
         UPDATE users
         SET name = :name,
             updatedAt = :updatedAt,
             cachedAt = :cachedAt,
-            userGUID = :userGUID
+            userGUID = :userGUID,
+            syncStatus = :syncStatus
         WHERE id = :id
     """)
-    suspend fun updateFromRemote(
+    suspend fun updateFromId(
         id: Long,
         name: String,
         updatedAt: Instant,
         cachedAt: Instant,
-        userGUID: String?
+        userGUID: String?,
+        syncStatus: SyncStatus
     )
 
     @Transaction
@@ -86,12 +73,13 @@ interface UserDao {
 
                 // Comparaison LWW : mise à jour si le serveur est plus récent
                 remoteUserEntity.updatedAt > local.updatedAt -> {
-                    updateFromRemote(
+                    updateFromId(
                         id = local.id,
                         name = remoteUserEntity.name,
                         updatedAt = remoteUserEntity.updatedAt,
                         cachedAt = remoteUserEntity.cachedAt,
-                        userGUID = remoteUserEntity.userGUID
+                        userGUID = remoteUserEntity.userGUID,
+                        syncStatus = SyncStatus.SYNCED
                         //No need for isLocalUser because if its an update it is already here
                     )
                 }

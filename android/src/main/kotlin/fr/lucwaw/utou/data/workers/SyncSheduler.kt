@@ -16,7 +16,7 @@ import javax.inject.Inject
 class SyncScheduler @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    fun scheduleOneTimeRegisterSync(userName: String) {
+    fun scheduleOneTimeRegisterSync(userId: Long, userName: String) {
         val request = OneTimeWorkRequestBuilder<SyncRegisterWorker>()
             .setConstraints(
                 Constraints.Builder()
@@ -24,6 +24,7 @@ class SyncScheduler @Inject constructor(
                     .build()
             ).setInputData(
                 workDataOf(
+                    "USER_ID" to userId,
                     "USER_NAME" to userName
                 )
             )
@@ -32,7 +33,7 @@ class SyncScheduler @Inject constructor(
         WorkManager.getInstance(context)
             .enqueueUniqueWork(
                 "sync_register",
-                ExistingWorkPolicy.KEEP,
+                ExistingWorkPolicy.REPLACE,
                 request
             )
     }
@@ -63,7 +64,11 @@ class SyncScheduler @Inject constructor(
             .build()
 
         WorkManager.getInstance(context)
-            .enqueue(request)
+            .enqueueUniqueWork(
+            "sync_register",
+            ExistingWorkPolicy.REPLACE,
+            request
+        )
     }
 
     fun scheduleUpdateToken() {

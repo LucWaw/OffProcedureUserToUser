@@ -63,7 +63,8 @@ class OffFirstUserRepository @Inject constructor(
         return userDao.getActualUserGUID()
     }
 
-    override suspend fun syncRegisteredUser(userName: String): CreateUserResult {
+    override suspend fun syncRegisteredUser(userName: String, userIdInput: Long): CreateUserResult {
+
         try {
             val response = stub.createUser(
                 createUserRequest { displayName = userName }
@@ -71,11 +72,13 @@ class OffFirstUserRepository @Inject constructor(
             if (response.status != Common.StatusCode.STATUS_OK) {
                 throw IllegalStateException(response.message)
             }
-            userDao.updateFromUserName(
+            userDao.updateFromId(
                 name = userName,
                 updatedAt = Instant.fromEpochMilliseconds(response.user.updatedAt),
                 cachedAt = Clock.System.now(),
-                userGUID = response.user.userGUID
+                userGUID = response.user.userGUID,
+                syncStatus = SyncStatus.SYNCED,
+                id = userIdInput
             )
             registerDevice(lastTokenGenerated)
 
@@ -93,22 +96,24 @@ class OffFirstUserRepository @Inject constructor(
         }
     }
 
-    override suspend fun registerUser(userName: String) {
+    override suspend fun registerUser(userName: String): Boolean {
         val now = Clock.System.now()
 
-        userDao.insert(
+        val result = userDao.insert(
             UserEntity(
                 id = 0L,
                 userGUID = "",
                 name = userName,
                 cachedAt = now,
                 updatedAt = now,
-                syncStatus = SyncStatus.FALSE,
+                syncStatus = SyncStatus.PENDING_UPLOAD,
                 isActualUser = true
             )
         )
 
-        syncScheduler.scheduleOneTimeRegisterSync(userName)
+        syncScheduler.scheduleOneTimeRegisterSync(result, userName)
+
+        return result != -1L
     }
 
     override suspend fun registerDevice(generatedFcmToken: String): CreateDeviceResult {
@@ -156,5 +161,9 @@ class OffFirstUserRepository @Inject constructor(
             status = response.status,
             message = response.message
         )
+    }
+
+    override fun blanck() {
+        println("dc")
     }
 }

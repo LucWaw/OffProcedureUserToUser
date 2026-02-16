@@ -1,6 +1,7 @@
 package fr.lucwaw.utou.data.workers
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import fr.lucwaw.utou.data.repository.UserRepository
@@ -16,9 +17,15 @@ class SyncRegisterWorker @Inject constructor(
         return try {
             val userNameInput =
                 inputData.getString("USER_NAME") ?: return Result.failure()
-            repository.syncRegisteredUser(userNameInput)
+            val userIdInput =
+                inputData.getLong("USER_ID", -2L)
+            if(userIdInput == -2L){
+                return Result.failure()
+            }
+            repository.syncRegisteredUser(userNameInput, userIdInput)
             Result.success()
-        } catch (_: Exception){
+        } catch (e: Exception){
+            Log.d("WORKER REGISTER", e.toString())
             Result.retry()
         }
     }
