@@ -2,18 +2,21 @@ package fr.lucwaw.utou.data.workers
 
 import android.content.Context
 import android.util.Log
+import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import fr.lucwaw.utou.data.repository.UserRepository
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
 
-class UpdateTokenWorker @Inject constructor(
+@HiltWorker
+class UpdateTokenWorker @AssistedInject constructor(
     private val repository: UserRepository,
-    appContext: Context,
-    workerParams: WorkerParameters
+    @Assisted appContext: Context,
+    @Assisted workerParams: WorkerParameters
 ) :
     CoroutineWorker(appContext, workerParams) {
 

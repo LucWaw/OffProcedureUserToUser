@@ -2,15 +2,18 @@ package fr.lucwaw.utou.data.workers
 
 import android.content.Context
 import android.util.Log
+import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import fr.lucwaw.utou.data.repository.UserRepository
-import javax.inject.Inject
 
-class SyncRegisterWorker @Inject constructor(
+@HiltWorker
+class SyncRegisterWorker @AssistedInject constructor(
     private val repository: UserRepository,
-    context: Context,
-    params: WorkerParameters,
+    @Assisted context: Context,
+    @Assisted params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {

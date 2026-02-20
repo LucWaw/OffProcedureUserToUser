@@ -27,7 +27,6 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
 
     implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
 
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
@@ -42,6 +41,12 @@ dependencies {
     implementation(libs.firebase.messaging.directboot)
 
     implementation(libs.androidx.work.runtime.ktx)
+
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.work)
+
+    ksp(libs.hilt.compiler)
+    ksp(libs.hilt.ext.compiler)
 }
 
 kotlin { jvmToolchain(21) }
