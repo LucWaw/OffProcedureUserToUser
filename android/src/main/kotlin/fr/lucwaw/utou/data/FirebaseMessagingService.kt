@@ -28,18 +28,13 @@ class FMService : FirebaseMessagingService() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val userId : String? = repository.getActualUserGUID()
-                if (userId != null && userId.isNotBlank()) {
-                    repository.registerDevice(token)
-                    Log.d("FCM", "Token envoyé au backend")
-                } else {
-                    repository.lastTokenGenerated = token
-                }
+                repository.registerDevice(token)
             } catch (e: Exception) {
                 Log.e("FCM", "Impossible d'envoyer le token", e)
             }
         }
     }
+
 
 
     override fun onMessageReceived(message: RemoteMessage) {

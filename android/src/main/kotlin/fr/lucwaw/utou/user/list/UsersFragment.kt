@@ -116,7 +116,7 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
         binding.loading.visibility = View.VISIBLE
         setupRecyclerView()
         observeUsers()
-
+        viewModel.refresh() // Launch refreshhm
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.refresh()
         }

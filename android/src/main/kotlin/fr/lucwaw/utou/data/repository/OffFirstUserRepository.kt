@@ -1,10 +1,11 @@
 package fr.lucwaw.utou.data.repository
 
 import android.util.Log
+import com.google.firebase.Firebase
+import com.google.firebase.messaging.messaging
 import fr.lucwaw.utou.data.dao.UserDao
 import fr.lucwaw.utou.data.entity.UserEntity
 import fr.lucwaw.utou.data.workers.SyncScheduler
-import fr.lucwaw.utou.domain.modele.CreateDeviceResult
 import fr.lucwaw.utou.domain.modele.CreateUserResult
 import fr.lucwaw.utou.domain.modele.SendPingResult
 import fr.lucwaw.utou.domain.modele.SyncStatus
@@ -18,6 +19,7 @@ import fr.lucwaw.utou.user.listUsersRequest
 import fr.lucwaw.utou.user.registerDeviceRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.tasks.await
 import utou.v1.Common
 import javax.inject.Inject
 import kotlin.time.Clock
@@ -30,18 +32,16 @@ class OffFirstUserRepository @Inject constructor(
     private val syncScheduler: SyncScheduler
 ) : UserRepository {
 
-    override lateinit var lastTokenGenerated: String
-
     override val users: Flow<List<User>> =
         userDao.getUsers().map { entities ->
             entities.map { it.toDomain() }
         }
 
-    override fun scheduleRefresh(){
+    override fun scheduleRefresh() {
         syncScheduler.scheduleOnetimeRefreshSync()
     }
 
-    override fun schedulePeriodicSync(){
+    override fun schedulePeriodicSync() {
         syncScheduler.schedulePeriodicSync()
     }
 
@@ -64,36 +64,28 @@ class OffFirstUserRepository @Inject constructor(
     }
 
     override suspend fun syncRegisteredUser(userName: String, userIdInput: Long): CreateUserResult {
-
-        try {
-            val response = stub.createUser(
-                createUserRequest { displayName = userName }
-            )
-            if (response.status != Common.StatusCode.STATUS_OK) {
-                throw IllegalStateException(response.message)
-            }
-            userDao.updateFromId(
-                name = userName,
-                updatedAt = Instant.fromEpochMilliseconds(response.user.updatedAt),
-                cachedAt = Clock.System.now(),
-                userGUID = response.user.userGUID,
-                syncStatus = SyncStatus.SYNCED,
-                id = userIdInput
-            )
-            registerDevice(lastTokenGenerated)
-
-            return CreateUserResult(
-                status = response.status,
-                userId = response.user.userGUID,
-                message = response.message
-            )
-        } catch (_: Exception) {
-            return CreateUserResult(
-                status = Common.StatusCode.STATUS_ERROR,
-                userId = "",
-                message = "Offline / pending sync"
-            )
+        val response = stub.createUser(
+            createUserRequest { displayName = userName }
+        )
+        if (response.status != Common.StatusCode.STATUS_OK) {
+            throw IllegalStateException(response.message)
         }
+        userDao.updateFromId(
+            name = userName,
+            updatedAt = Instant.fromEpochMilliseconds(response.user.updatedAt),
+            cachedAt = Clock.System.now(),
+            userGUID = response.user.userGUID,
+            syncStatus = SyncStatus.SYNCED,
+            id = userIdInput
+        )
+        registerDevice( Firebase.messaging.token.await())
+
+        return CreateUserResult(
+            status = response.status,
+            userId = response.user.userGUID,
+            message = response.message
+        )
+
     }
 
     override suspend fun registerUser(userName: String): Boolean {
@@ -116,26 +108,16 @@ class OffFirstUserRepository @Inject constructor(
         return result != -1L
     }
 
-    override suspend fun registerDevice(generatedFcmToken: String): CreateDeviceResult {
-        val generatedGUID = userDao.getActualUserGUID() ?: return CreateDeviceResult(
-            Common.StatusCode.STATUS_ERROR,
-            "actual userGUID Not Found"
-        )
+    override suspend fun registerDevice(generatedFcmToken: String) {
+        val generatedGUID = userDao.getActualUserGUID() ?: throw IllegalStateException("pas d'user actuel")
         if (generatedGUID.isBlank()) {
-            return CreateDeviceResult(
-                Common.StatusCode.STATUS_ERROR,
-                "The user trying to register token needs to register online earlier."
-            )
+            throw IllegalStateException("user actuel sans guid")
         }
-        val response = stub.registerDevice(
+        stub.registerDevice(
             registerDeviceRequest {
                 userId = generatedGUID
                 fcmToken = generatedFcmToken
             })
-
-        return CreateDeviceResult(
-            status = response.status, message = response.message
-        )
     }
 
     override suspend fun sendPing(toUserGUID: String): SendPingResult {

@@ -45,6 +45,10 @@ class SyncScheduler @Inject constructor(
                     .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build()
             )
+            .setInputData(
+                workDataOf(
+                    "Type" to "Periodic")
+            )
             .build()
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
@@ -60,6 +64,10 @@ class SyncScheduler @Inject constructor(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build()
+            )
+            .setInputData(
+                workDataOf(
+                    "Type" to "Refresh")
             )
             .build()
 
