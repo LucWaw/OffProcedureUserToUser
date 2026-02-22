@@ -12,7 +12,6 @@ import fr.lucwaw.utou.data.dao.UserDao
 import fr.lucwaw.utou.data.repository.OffFirstUserRepository
 import fr.lucwaw.utou.data.repository.UserRepository
 import fr.lucwaw.utou.data.workers.SyncScheduler
-import fr.lucwaw.utou.data.workers.SyncUsersWorker
 import fr.lucwaw.utou.ping.PingServiceGrpcKt
 import fr.lucwaw.utou.user.UserServiceGrpcKt
 import io.grpc.ManagedChannel

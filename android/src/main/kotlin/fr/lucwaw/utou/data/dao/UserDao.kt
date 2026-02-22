@@ -32,7 +32,8 @@ interface UserDao {
     @Insert
     suspend fun insert(user: UserEntity): Long
 
-    @Query("""
+    @Query(
+        """
         UPDATE users
         SET name = :name,
             updatedAt = :updatedAt,
@@ -40,7 +41,8 @@ interface UserDao {
             userGUID = :userGUID,
             syncStatus = :syncStatus
         WHERE id = :id
-    """)
+    """
+    )
     suspend fun updateFromId(
         id: Long,
         name: String,
@@ -80,7 +82,7 @@ interface UserDao {
                         cachedAt = remoteUserEntity.cachedAt,
                         userGUID = remoteUserEntity.userGUID,
                         syncStatus = SyncStatus.SYNCED
-                        //No need for isLocalUser because if its an update it is already here
+                        //No need for isLocalUser because if it is an update it is already here
                     )
                 }
 

@@ -1,7 +1,6 @@
 package fr.lucwaw.utou.domain.usecase
 
 import fr.lucwaw.utou.data.repository.UserRepository
-import fr.lucwaw.utou.domain.modele.CreateUserResult
 import javax.inject.Inject
 
 class RegisterUserUseCase @Inject constructor(
