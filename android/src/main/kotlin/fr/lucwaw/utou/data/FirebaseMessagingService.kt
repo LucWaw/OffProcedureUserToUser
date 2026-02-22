@@ -29,6 +29,7 @@ class FMService : FirebaseMessagingService() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 repository.registerDevice(token)
+                Log.d("Firebase update", "UPDATE")
             } catch (e: Exception) {
                 Log.e("FCM", "Impossible d'envoyer le token", e)
             }

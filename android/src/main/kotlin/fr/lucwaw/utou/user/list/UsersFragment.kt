@@ -116,6 +116,7 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
         binding.loading.visibility = View.VISIBLE
         setupRecyclerView()
         observeUsers()
+        observeUsersRefresh()
         viewModel.refresh() // Launch refreshhm
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.refresh()
@@ -131,7 +132,6 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.usersFlow.collect { users ->
                     candidateAdapter.submitList(users)
-                    binding.swipeRefresh.isRefreshing = false
 
                     binding.loading.visibility = View.GONE
                     binding.noData.visibility =
@@ -139,6 +139,17 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
                 }
             }
         }
+    }
+
+    private fun observeUsersRefresh() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isRefreshing.collect { refreshing ->
+                    binding.swipeRefresh.isRefreshing = refreshing
+                }
+            }
+        }
+
     }
 
 

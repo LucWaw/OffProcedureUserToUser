@@ -9,7 +9,9 @@ import fr.lucwaw.utou.domain.usecase.ScheduleOneTimeRefreshUseCase
 import fr.lucwaw.utou.domain.usecase.SchedulePeriodicRefreshUseCase
 import fr.lucwaw.utou.domain.usecase.ScheduleUpdateToken
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import utou.v1.Common
@@ -31,10 +33,16 @@ class UsersViewModel @Inject constructor(
             emptyList()
         )
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
 
-    fun refresh(){
+
+    fun refresh() {
+        _isRefreshing.value = true
         scheduleOneTimeRefreshUseCase()
+        _isRefreshing.value = false
     }
+
 
     fun periodicRefresh(){
         schedulePeriodicRefreshUseCase()
