@@ -117,7 +117,7 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
         setupRecyclerView()
         observeUsers()
         observeUsersRefresh()
-        viewModel.refresh() // Launch refreshhm
+        viewModel.refresh() // Launch refresh
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.refresh()
         }
