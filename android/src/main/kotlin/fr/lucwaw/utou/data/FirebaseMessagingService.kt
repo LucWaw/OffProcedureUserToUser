@@ -28,13 +28,8 @@ class FMService : FirebaseMessagingService() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val userId = repository.generatedUserId
-                if (userId.isNotBlank()) {
-                    repository.registerDevice(token)
-                    Log.d("FCM", "Token envoyé au backend")
-                } else {
-                    repository.lastTokenGenerated = token
-                }
+                repository.registerDevice(token)
+                Log.d("Firebase update", "UPDATE")
             } catch (e: Exception) {
                 Log.e("FCM", "Impossible d'envoyer le token", e)
             }
@@ -42,16 +37,11 @@ class FMService : FirebaseMessagingService() {
     }
 
 
+
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        Log.d(
-            "FirebaseMessagingService",
-            "From: ${message.notification?.title}, channel: ${message.notification?.channelId}"
-        )
 
-        val notification = message.notification
-        if (notification != null) {
-            notificationService.sendNotification(notification.title, notification.body)
-        }
+        val notification = message.data
+        notificationService.sendNotification(notification["title"], notification["body"])
     }
 }

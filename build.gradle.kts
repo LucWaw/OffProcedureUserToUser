@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.hiltAndroid) apply false
     alias(libs.plugins.kotlinAndroidKsp) apply false
     alias(libs.plugins.googleServices) apply false
+    alias(libs.plugins.crashAnalytics) apply false
 }
 
 tasks.create("assemble").dependsOn(":server:installDist")

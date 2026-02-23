@@ -20,7 +20,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import fr.lucwaw.utou.databinding.RecyclerUsersBinding
-import fr.lucwaw.utou.user.User
+import fr.lucwaw.utou.domain.modele.User
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -48,7 +48,7 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
         return binding.root
     }
 
-    fun observeSendingPing(){
+    fun observeSendingPing() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.toastEvent.collect { message ->
@@ -116,24 +116,14 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
         binding.loading.visibility = View.VISIBLE
         setupRecyclerView()
         observeUsers()
-
+        observeUsersRefresh()
+        viewModel.refresh() // Launch refresh
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.refresh()
         }
 
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.refreshing.collect {
-                    binding.swipeRefresh.isRefreshing = it
-                }
-            }
-        }
-
-
-        // premier chargement
-        viewModel.refresh()
-
-
+        viewModel.periodicRefresh()
+        viewModel.updateToken()
     }
 
 
@@ -142,7 +132,6 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.usersFlow.collect { users ->
                     candidateAdapter.submitList(users)
-                    binding.swipeRefresh.isRefreshing = false
 
                     binding.loading.visibility = View.GONE
                     binding.noData.visibility =
@@ -150,6 +139,17 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
                 }
             }
         }
+    }
+
+    private fun observeUsersRefresh() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isRefreshing.collect { refreshing ->
+                    binding.swipeRefresh.isRefreshing = refreshing
+                }
+            }
+        }
+
     }
 
 
@@ -160,7 +160,7 @@ class UsersFragment : Fragment(), UserAdapter.OnUserClickListener {
     }
 
     override fun onUserClick(user: User) {
-        viewModel.sendPing(user.userId)
+        viewModel.sendPing(user.userGUID ?: "")
     }
 
 }

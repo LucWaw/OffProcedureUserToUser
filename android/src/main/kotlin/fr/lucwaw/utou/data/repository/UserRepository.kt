@@ -1,22 +1,30 @@
 package fr.lucwaw.utou.data.repository
 
-import fr.lucwaw.utou.domain.modele.CreateDeviceResult
 import fr.lucwaw.utou.domain.modele.CreateUserResult
 import fr.lucwaw.utou.domain.modele.SendPingResult
-import fr.lucwaw.utou.user.User
-import kotlinx.coroutines.flow.StateFlow
+import fr.lucwaw.utou.domain.modele.User
+import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
 
-    val generatedUserId: String
-    var lastTokenGenerated: String
+    val users: Flow<List<User>>
 
-    val usersFlow: StateFlow<List<User>>
     suspend fun refreshUsers()
 
-    suspend fun registerUser(userName: String): CreateUserResult
+    suspend fun getActualUserGUID(): String?
 
-    suspend fun registerDevice(generatedFcmToken: String): CreateDeviceResult
+    suspend fun registerUser(userName: String): Boolean
 
-    suspend fun sendPing(toUserId: String): SendPingResult
+    fun scheduleRefresh()
+
+    fun schedulePeriodicSync()
+
+    fun scheduleUpdateToken()
+
+    fun schedulePingUser(userGUID: String) : SendPingResult
+
+    suspend fun registerDevice(generatedFcmToken: String)
+
+    suspend fun sendPing(toUserGUID: String): SendPingResult
+    suspend fun syncRegisteredUser(userName: String, userIdInput: Long): CreateUserResult
 }

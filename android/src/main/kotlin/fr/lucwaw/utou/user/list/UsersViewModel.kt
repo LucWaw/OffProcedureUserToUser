@@ -3,9 +3,11 @@ package fr.lucwaw.utou.user.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import fr.lucwaw.utou.domain.GetUsersFlowUseCase
-import fr.lucwaw.utou.domain.PingUserUseCase
-import fr.lucwaw.utou.domain.RefreshUsersUseCase
+import fr.lucwaw.utou.domain.usecase.GetUsersFlowUseCase
+import fr.lucwaw.utou.domain.usecase.ScheduleOneTimePingUserUseCase
+import fr.lucwaw.utou.domain.usecase.ScheduleOneTimeRefreshUseCase
+import fr.lucwaw.utou.domain.usecase.SchedulePeriodicRefreshUseCase
+import fr.lucwaw.utou.domain.usecase.ScheduleUpdateToken
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,8 +21,10 @@ import javax.inject.Inject
 @HiltViewModel
 class UsersViewModel @Inject constructor(
     getUsersFlowUseCase: GetUsersFlowUseCase,
-    private val refreshUsersUseCase: RefreshUsersUseCase,
-    private val pingUserUseCase: PingUserUseCase
+    private val schedulePeriodicRefreshUseCase: SchedulePeriodicRefreshUseCase,
+    private val scheduleOneTimeRefreshUseCase: ScheduleOneTimeRefreshUseCase,
+    private val scheduleUpdateToken: ScheduleUpdateToken,
+    private val pingUserUseCase: ScheduleOneTimePingUserUseCase
 ) : ViewModel() {
     val usersFlow = getUsersFlowUseCase()
         .stateIn(
@@ -29,28 +33,31 @@ class UsersViewModel @Inject constructor(
             emptyList()
         )
 
-    private val _refreshing = MutableStateFlow(false)
-    val refreshing = _refreshing.asStateFlow()
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
 
     fun refresh() {
-        viewModelScope.launch {
-            try {
-                _refreshing.value = true
-                refreshUsersUseCase()
-            } catch(_: Exception){
-                // optionnel : log / toast Event
-            } finally {
-                _refreshing.value = false
-            }
-        }
+        _isRefreshing.value = true
+        scheduleOneTimeRefreshUseCase()
+        _isRefreshing.value = false
+    }
+
+
+    fun periodicRefresh(){
+        schedulePeriodicRefreshUseCase()
+    }
+
+    fun updateToken(){
+        scheduleUpdateToken()
     }
 
     private val _toastEvent = MutableSharedFlow<String>()
     val toastEvent = _toastEvent
 
-    fun sendPing(toUserId: String) {
+    fun sendPing(toUserGUID: String) {
         viewModelScope.launch {
-            val result = pingUserUseCase.execute(toUserId)
+            val result = pingUserUseCase.execute(toUserGUID)
 
             val toast = when (result.status) {
                 Common.StatusCode.STATUS_OK ->
