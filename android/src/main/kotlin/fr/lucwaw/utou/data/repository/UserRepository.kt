@@ -21,9 +21,10 @@ interface UserRepository {
 
     fun scheduleUpdateToken()
 
+    fun schedulePingUser(userGUID: String) : SendPingResult
+
     suspend fun registerDevice(generatedFcmToken: String)
 
     suspend fun sendPing(toUserGUID: String): SendPingResult
     suspend fun syncRegisteredUser(userName: String, userIdInput: Long): CreateUserResult
-    fun blanck()
 }

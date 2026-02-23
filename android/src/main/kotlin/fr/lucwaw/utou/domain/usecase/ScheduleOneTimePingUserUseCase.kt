@@ -4,7 +4,7 @@ import fr.lucwaw.utou.data.repository.UserRepository
 import fr.lucwaw.utou.domain.modele.SendPingResult
 import javax.inject.Inject
 
-class PingUserUseCase @Inject constructor(
+class ScheduleOneTimePingUserUseCase @Inject constructor(
     private val userRepository: UserRepository
 ) {
     /**
@@ -13,7 +13,7 @@ class PingUserUseCase @Inject constructor(
      * @param toUserGUID l'id de la cible
      * @return SendPingResult retourné par le repository
      */
-    suspend fun execute(toUserGUID: String): SendPingResult {
-        return userRepository.sendPing(toUserGUID)
+    fun execute(toUserGUID: String): SendPingResult {
+        return userRepository.schedulePingUser(toUserGUID)
     }
 }

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import fr.lucwaw.utou.domain.usecase.GetUsersFlowUseCase
-import fr.lucwaw.utou.domain.usecase.PingUserUseCase
+import fr.lucwaw.utou.domain.usecase.ScheduleOneTimePingUserUseCase
 import fr.lucwaw.utou.domain.usecase.ScheduleOneTimeRefreshUseCase
 import fr.lucwaw.utou.domain.usecase.SchedulePeriodicRefreshUseCase
 import fr.lucwaw.utou.domain.usecase.ScheduleUpdateToken
@@ -24,7 +24,7 @@ class UsersViewModel @Inject constructor(
     private val schedulePeriodicRefreshUseCase: SchedulePeriodicRefreshUseCase,
     private val scheduleOneTimeRefreshUseCase: ScheduleOneTimeRefreshUseCase,
     private val scheduleUpdateToken: ScheduleUpdateToken,
-    private val pingUserUseCase: PingUserUseCase
+    private val pingUserUseCase: ScheduleOneTimePingUserUseCase
 ) : ViewModel() {
     val usersFlow = getUsersFlowUseCase()
         .stateIn(
@@ -55,9 +55,9 @@ class UsersViewModel @Inject constructor(
     private val _toastEvent = MutableSharedFlow<String>()
     val toastEvent = _toastEvent
 
-    fun sendPing(toUserId: String) {
+    fun sendPing(toUserGUID: String) {
         viewModelScope.launch {
-            val result = pingUserUseCase.execute(toUserId)
+            val result = pingUserUseCase.execute(toUserGUID)
 
             val toast = when (result.status) {
                 Common.StatusCode.STATUS_OK ->

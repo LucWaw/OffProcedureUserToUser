@@ -49,6 +49,14 @@ class OffFirstUserRepository @Inject constructor(
         syncScheduler.scheduleUpdateToken()
     }
 
+    override fun schedulePingUser(userGUID: String): SendPingResult {
+        syncScheduler.schedulePingUser(userGUID)
+        return SendPingResult(
+            Common.StatusCode.STATUS_OK,
+            "Sending Ping..."
+        )
+    }
+
     override suspend fun refreshUsers() {
         try {
             val remoteUsers = stub.listUsers(listUsersRequest {})
@@ -143,9 +151,5 @@ class OffFirstUserRepository @Inject constructor(
             status = response.status,
             message = response.message
         )
-    }
-
-    override fun blanck() {
-        println("dc")
     }
 }

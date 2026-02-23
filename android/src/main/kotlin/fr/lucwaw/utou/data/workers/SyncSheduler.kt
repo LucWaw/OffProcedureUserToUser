@@ -94,4 +94,23 @@ class SyncScheduler @Inject constructor(
         )
     }
 
+    fun schedulePingUser(userGUID: String) {
+        val request = OneTimeWorkRequestBuilder<PingUser>()
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            ).setInputData(
+                workDataOf(
+                    "USER_GUID" to userGUID,
+                )
+            )
+            .build()
+
+        WorkManager.getInstance(context)
+            .enqueue(
+                request
+            )
+    }
+
 }

@@ -40,14 +40,8 @@ class FMService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        Log.d(
-            "FirebaseMessagingService",
-            "From: ${message.notification?.title}, channel: ${message.notification?.channelId}"
-        )
 
-        val notification = message.notification
-        if (notification != null) {
-            notificationService.sendNotification(notification.title, notification.body)
-        }
+        val notification = message.data
+        notificationService.sendNotification(notification["title"], notification["body"])
     }
 }

@@ -3,7 +3,6 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.Message
-import com.google.firebase.messaging.Notification
 import fr.lucwaw.utou.ping.PingServiceGrpcKt
 import fr.lucwaw.utou.ping.SendPingRequest
 import fr.lucwaw.utou.ping.SendPingResponse
@@ -164,15 +163,15 @@ internal class PingService(
             try {
                 val message: Message = Message.builder()
                     .setToken(device)
-                    .setNotification(
-                        Notification.builder()
-                            .setTitle("To you ${receiver?.displayName}")
-                            .setBody("To ${receiver?.displayName}, ${request.toUserId}, From ${sender?.displayName}, ${request.fromUserId}")
-                            .build()
+                    .putData("title", "To you ${receiver?.displayName}")
+                    .putData(
+                        "body",
+                        "To ${receiver?.displayName}, ${request.toUserId}, From ${sender?.displayName}, ${request.fromUserId}"
                     )
                     .build()
 
                 val response = FirebaseMessaging.getInstance().send(message)
+
 
                 println("Successfully sent message: $response")
             } catch (e: Exception) {
